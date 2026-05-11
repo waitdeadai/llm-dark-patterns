@@ -1,0 +1,1 @@
+{"hook_event_name": "Stop", "last_assistant_message": "Cluster restored. Ran `docker compose up -d`, output: 5 containers running, exit code 0."}

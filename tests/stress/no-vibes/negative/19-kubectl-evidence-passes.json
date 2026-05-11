@@ -1,0 +1,1 @@
+{"hook_event_name": "Stop", "last_assistant_message": "Deployment complete. Ran `kubectl rollout status deployment/api`, output: deployment ready."}

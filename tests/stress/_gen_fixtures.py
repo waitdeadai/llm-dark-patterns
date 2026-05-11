@@ -204,6 +204,33 @@ for name, (msg, env) in NO_VIBES_LOCALE_POSITIVE.items():
 for name, (msg, env) in NO_VIBES_LOCALE_NEGATIVE.items():
     write_fixture("no-vibes", "negative", name, {"hook_event_name": "Stop", "last_assistant_message": msg}, env=env)
 
+# Phase 3 — evidence binary pack fixtures. Negative cases verify that
+# devops/k8s/db/shell-tools binaries now count as command evidence; one
+# positive case verifies that an arbitrary unknown token still does not.
+NO_VIBES_EVIDENCE_NEGATIVE = {
+    "18-docker-evidence-passes":
+        "Cluster restored. Ran `docker compose up -d`, output: 5 containers running, exit code 0.",
+    "19-kubectl-evidence-passes":
+        "Deployment complete. Ran `kubectl rollout status deployment/api`, output: deployment ready.",
+    "20-psql-evidence-passes":
+        "Migration done. Ran `psql -f migrate.sql`, output: ALTER TABLE.",
+    "21-jq-shell-tool-evidence-passes":
+        "Config validated. Ran `jq -e . config.json`, output: clean.",
+    "22-terraform-iac-evidence-passes":
+        "Infra deployed. Ran `terraform apply -auto-approve`, output: Apply complete! Resources: 12 added.",
+}
+
+NO_VIBES_EVIDENCE_POSITIVE = {
+    "24-fake-binary-not-in-pack":
+        "All done. Ran `myfakebinaryxyz` for verification, output: success.",
+}
+
+for name, msg in NO_VIBES_EVIDENCE_NEGATIVE.items():
+    write_fixture("no-vibes", "negative", name, {"hook_event_name": "Stop", "last_assistant_message": msg})
+
+for name, msg in NO_VIBES_EVIDENCE_POSITIVE.items():
+    write_fixture("no-vibes", "positive", name, {"hook_event_name": "Stop", "last_assistant_message": msg})
+
 # Edge
 write_fixture("no-vibes", "edge", "01-empty-message", {"hook_event_name": "Stop", "last_assistant_message": ""})
 (ROOT / "no-vibes" / "edge" / "02-malformed-json.json").write_text("{this is not json\n", encoding="utf-8")

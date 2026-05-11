@@ -34,6 +34,53 @@ _load_with_fallback() {
 POSITIVE_VERBS_RE="$(_load_with_fallback positive_closeout 'all set|done|completed|complete|implemented|fixed|finished|ready|passes|passed|shipped')"
 NEGATIONS_RE="$(_load_with_fallback negation 'not done|not complete|not completed|not ready|incomplete|unfinished|never ran|did not (run|execute|test|verify)')"
 
+# Phase 3: evidence binaries pack. Resolves which backtick-quoted tokens
+# count as a real command. Sections are opt-in via env or all-by-default.
+_load_evidence_binaries() {
+  local section_filter="${LLM_DARK_PATTERNS_EVIDENCE_CATEGORIES:-}"
+  if ! declare -F resolve_pack_paths >/dev/null 2>&1; then
+    return
+  fi
+  local pack_paths=()
+  local path
+  while IFS= read -r path; do
+    pack_paths+=("$path")
+  done < <(resolve_pack_paths "evidence" "binaries")
+
+  local section combined=""
+  if [ -z "$section_filter" ]; then
+    # Default: load every known section in the pack.
+    for section in app-dev containers k8s devops cloud database shell-tools system archive http; do
+      local part
+      part="$(load_pack_section "$section" "${pack_paths[@]}" 2>/dev/null)"
+      [ -z "$part" ] && continue
+      if [ -z "$combined" ]; then
+        combined="$part"
+      else
+        combined="${combined}|${part}"
+      fi
+    done
+  else
+    while IFS= read -r section; do
+      [ -z "$section" ] && continue
+      local part
+      part="$(load_pack_section "$section" "${pack_paths[@]}" 2>/dev/null)"
+      [ -z "$part" ] && continue
+      if [ -z "$combined" ]; then
+        combined="$part"
+      else
+        combined="${combined}|${part}"
+      fi
+    done < <(printf '%s' "$section_filter" | tr ',' '\n')
+  fi
+  printf '%s' "$combined"
+}
+
+EVIDENCE_BINARIES_RE="$(_load_evidence_binaries)"
+if [ -z "$EVIDENCE_BINARIES_RE" ]; then
+  EVIDENCE_BINARIES_RE='bash|git|npm|pnpm|yarn|pytest|python3?|ruff|cargo|go test|make'
+fi
+
 INPUT="$(cat)"
 
 if ! command -v jq >/dev/null 2>&1; then
@@ -274,13 +321,13 @@ has_command_evidence() {
   # longer counts as evidence.
   local message="$1"
 
-  if printf '%s\n' "$message" | grep -Eiq '(^|[[:space:]])commands?[[:space:]]+run:[^[:cntrl:]]{0,40}`(bash|git|npm|pnpm|yarn|pytest|python3?|ruff|cargo|go test|make)[^`]*`'; then
+  if printf '%s\n' "$message" | grep -Eiq "(^|[[:space:]])commands?[[:space:]]+run:[^[:cntrl:]]{0,40}\`(${EVIDENCE_BINARIES_RE})[^\`]*\`"; then
     return 0
   fi
 
   local closing
   closing="$(printf '%s' "$message" | tail -c 240)"
-  if printf '%s\n' "$closing" | grep -Eiq '(\bran\b|\bexecuted\b|\brunning\b|\boutput\b|\bresult of\b|\bpassed\b|\bexit code\b|\bstderr\b|\bstdout\b|\breturned\b)[^`]{0,80}`(bash|git|npm|pnpm|yarn|pytest|python3?|ruff|cargo|go test|make)[^`]*`'; then
+  if printf '%s\n' "$closing" | grep -Eiq "(\bran\b|\bexecuted\b|\brunning\b|\boutput\b|\bresult of\b|\bpassed\b|\bexit code\b|\bstderr\b|\bstdout\b|\breturned\b)[^\`]{0,80}\`(${EVIDENCE_BINARIES_RE})[^\`]*\`"; then
     return 0
   fi
 
