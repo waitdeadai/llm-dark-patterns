@@ -1,0 +1,1 @@
+{"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"command": "terraform state rm aws_db_instance.prod"}}

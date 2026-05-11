@@ -1,0 +1,24 @@
+# packs/destructive/git-protected.txt — destructive command surface: git history rewriting and protected-branch ops.
+#
+# One regex per line, blank lines and `#`-comments ignored. Each entry is
+# matched case-insensitively against the proposed Bash command via grep -E.
+# Sections within a file are loaded together for that surface.
+#
+# Operators choose which surfaces apply via env:
+#   LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS=filesystem,container,git-protected
+# Default: all surfaces active. Subset via the env var.
+#
+# Add custom patterns via packs/destructive/extras.txt or via
+# ${XDG_CONFIG_HOME}/llm-dark-patterns/packs/destructive/<surface>.txt —
+# operator-local additions extend, never replace.
+
+[patterns]
+(^|[[:space:];&|])git[[:space:]]+push[[:space:]]+(.*)?(-f|--force)([[:space:]]|$)
+(^|[[:space:];&|])git[[:space:]]+push[[:space:]]+(.*)?--force-with-lease
+(^|[[:space:];&|])git[[:space:]]+filter-branch
+(^|[[:space:];&|])git[[:space:]]+filter-repo
+(^|[[:space:];&|])git[[:space:]]+update-ref[[:space:]]+-d
+(^|[[:space:];&|])git[[:space:]]+(branch|tag)[[:space:]]+-D[[:space:]]+
+(^|[[:space:];&|])git[[:space:]]+rebase[[:space:]]+(.*)?(-i|--interactive)
+(^|[[:space:];&|])git[[:space:]]+reflog[[:space:]]+expire[[:space:]]+--expire=now
+(^|[[:space:];&|])git[[:space:]]+gc[[:space:]]+(.*)?--prune=now

@@ -1,0 +1,22 @@
+# packs/destructive/database.txt — destructive command surface: destructive database operations (DROP/TRUNCATE/FLUSH).
+#
+# One regex per line, blank lines and `#`-comments ignored. Each entry is
+# matched case-insensitively against the proposed Bash command via grep -E.
+# Sections within a file are loaded together for that surface.
+#
+# Operators choose which surfaces apply via env:
+#   LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS=filesystem,container,git-protected
+# Default: all surfaces active. Subset via the env var.
+#
+# Add custom patterns via packs/destructive/extras.txt or via
+# ${XDG_CONFIG_HOME}/llm-dark-patterns/packs/destructive/<surface>.txt —
+# operator-local additions extend, never replace.
+
+[patterns]
+\bDROP[[:space:]]+(TABLE|DATABASE|SCHEMA|INDEX|VIEW|MATERIALIZED[[:space:]]+VIEW)\b
+\bTRUNCATE[[:space:]]+(TABLE[[:space:]]+)?
+\bDELETE[[:space:]]+FROM[[:space:]]+[^[:space:]]+([[:space:]]*;[[:space:]]*$|--|/\*)
+(^|[[:space:];&|])redis-cli[[:space:]]+(.*)?(FLUSHALL|FLUSHDB)
+(^|[[:space:];&|])mongo(sh)?[[:space:]]+(.*)?dropDatabase\(\)
+(^|[[:space:];&|])dropdb[[:space:]]+
+(^|[[:space:];&|])mysqladmin[[:space:]]+drop[[:space:]]+

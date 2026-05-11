@@ -1,0 +1,25 @@
+# packs/destructive/filesystem.txt — destructive command surface: filesystem-level destruction.
+#
+# One regex per line, blank lines and `#`-comments ignored. Each entry is
+# matched case-insensitively against the proposed Bash command via grep -E.
+# Sections within a file are loaded together for that surface.
+#
+# Operators choose which surfaces apply via env:
+#   LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS=filesystem,container,git-protected
+# Default: all surfaces active. Subset via the env var.
+#
+# Add custom patterns via packs/destructive/extras.txt or via
+# ${XDG_CONFIG_HOME}/llm-dark-patterns/packs/destructive/<surface>.txt —
+# operator-local additions extend, never replace.
+
+[patterns]
+(^|[[:space:];&|])sudo[[:space:]]+rm[[:space:]].*(-[[:alnum:]]*r|--recursive)([[:space:]]|$)
+(^|[[:space:];&|])rm[[:space:]]+(-[[:alnum:]]*r[[:alnum:]]*|--recursive)([[:space:]]|$)
+(^|[[:space:];&|])rm[[:space:]]+-[[:alnum:]]*f[[:alnum:]]*[[:space:]]+/
+(^|[[:space:];&|])git[[:space:]]+reset[[:space:]]+--hard([[:space:]]|$)
+(^|[[:space:];&|])git[[:space:]]+clean[[:space:]]+-[[:alnum:]]*(f[[:alnum:]]*d|d[[:alnum:]]*f)
+(^|[[:space:];&|])git[[:space:]]+checkout[[:space:]]+--[[:space:]]
+(^|[[:space:];&|])find[[:space:]].*[[:space:]]-delete([[:space:]]|$)
+(^|[[:space:];&|])mkfs(\.[[:alnum:]_-]+)?([[:space:]]|$)
+(^|[[:space:];&|])dd[[:space:]].*[[:space:]]of=/dev/
+(^|[[:space:];&|])chmod[[:space:]]+-R[[:space:]]+777([[:space:]]|$)

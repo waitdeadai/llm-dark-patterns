@@ -1,0 +1,19 @@
+# packs/destructive/service.txt — destructive command surface: stopping load-bearing services.
+#
+# One regex per line, blank lines and `#`-comments ignored. Each entry is
+# matched case-insensitively against the proposed Bash command via grep -E.
+# Sections within a file are loaded together for that surface.
+#
+# Operators choose which surfaces apply via env:
+#   LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS=filesystem,container,git-protected
+# Default: all surfaces active. Subset via the env var.
+#
+# Add custom patterns via packs/destructive/extras.txt or via
+# ${XDG_CONFIG_HOME}/llm-dark-patterns/packs/destructive/<surface>.txt —
+# operator-local additions extend, never replace.
+
+[patterns]
+(^|[[:space:];&|])systemctl[[:space:]]+(stop|disable|mask)[[:space:]]+
+(^|[[:space:];&|])service[[:space:]]+[^[:space:]]+[[:space:]]+stop
+(^|[[:space:];&|])launchctl[[:space:]]+(unload|stop)[[:space:]]+
+(^|[[:space:];&|])supervisorctl[[:space:]]+stop[[:space:]]+

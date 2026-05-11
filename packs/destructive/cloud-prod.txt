@@ -1,0 +1,26 @@
+# packs/destructive/cloud-prod.txt — destructive command surface: production cloud destruction (IaC destroy, bucket rm, resource delete).
+#
+# One regex per line, blank lines and `#`-comments ignored. Each entry is
+# matched case-insensitively against the proposed Bash command via grep -E.
+# Sections within a file are loaded together for that surface.
+#
+# Operators choose which surfaces apply via env:
+#   LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS=filesystem,container,git-protected
+# Default: all surfaces active. Subset via the env var.
+#
+# Add custom patterns via packs/destructive/extras.txt or via
+# ${XDG_CONFIG_HOME}/llm-dark-patterns/packs/destructive/<surface>.txt —
+# operator-local additions extend, never replace.
+
+[patterns]
+(^|[[:space:];&|])terraform[[:space:]]+destroy
+(^|[[:space:];&|])tofu[[:space:]]+destroy
+(^|[[:space:];&|])pulumi[[:space:]]+destroy
+(^|[[:space:];&|])terraform[[:space:]]+state[[:space:]]+(rm|mv)
+(^|[[:space:];&|])aws[[:space:]]+s3[[:space:]]+rb[[:space:]]+
+(^|[[:space:];&|])aws[[:space:]]+s3[[:space:]]+rm[[:space:]]+(.*)?(--recursive|--include)
+(^|[[:space:];&|])aws[[:space:]]+(rds|ec2|cloudformation|iam)[[:space:]]+delete-
+(^|[[:space:];&|])gcloud[[:space:]]+(compute|sql|storage|projects)[[:space:]]+(.*)?delete
+(^|[[:space:];&|])gsutil[[:space:]]+rm[[:space:]]+(.*)?-r
+(^|[[:space:];&|])az[[:space:]]+(group|vm|storage)[[:space:]]+delete
+(^|[[:space:];&|])doctl[[:space:]]+(droplet|database|kubernetes)[[:space:]]+delete

@@ -1,0 +1,25 @@
+# packs/destructive/container.txt — destructive command surface: container and orchestration destruction.
+#
+# One regex per line, blank lines and `#`-comments ignored. Each entry is
+# matched case-insensitively against the proposed Bash command via grep -E.
+# Sections within a file are loaded together for that surface.
+#
+# Operators choose which surfaces apply via env:
+#   LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS=filesystem,container,git-protected
+# Default: all surfaces active. Subset via the env var.
+#
+# Add custom patterns via packs/destructive/extras.txt or via
+# ${XDG_CONFIG_HOME}/llm-dark-patterns/packs/destructive/<surface>.txt —
+# operator-local additions extend, never replace.
+
+[patterns]
+(^|[[:space:];&|])docker[[:space:]]+(stop|kill|rm|rmi)[[:space:]]+
+(^|[[:space:];&|])docker[[:space:]]+system[[:space:]]+prune[[:space:]]+(.*)?(-a|--all|--force)
+(^|[[:space:];&|])docker[[:space:]]+volume[[:space:]]+(rm|prune)
+(^|[[:space:];&|])docker[[:space:]]+network[[:space:]]+(rm|prune)
+(^|[[:space:];&|])podman[[:space:]]+(stop|kill|rm|rmi)[[:space:]]+
+(^|[[:space:];&|])kubectl[[:space:]]+delete[[:space:]]+
+(^|[[:space:];&|])kubectl[[:space:]]+rollout[[:space:]]+undo
+(^|[[:space:];&|])kubectl[[:space:]]+drain[[:space:]]+
+(^|[[:space:];&|])helm[[:space:]]+(uninstall|delete)[[:space:]]+
+(^|[[:space:];&|])argocd[[:space:]]+app[[:space:]]+delete[[:space:]]+

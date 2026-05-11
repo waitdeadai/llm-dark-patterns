@@ -231,6 +231,49 @@ for name, msg in NO_VIBES_EVIDENCE_NEGATIVE.items():
 for name, msg in NO_VIBES_EVIDENCE_POSITIVE.items():
     write_fixture("no-vibes", "positive", name, {"hook_event_name": "Stop", "last_assistant_message": msg})
 
+# Phase 4 — destructive surface fixtures. Literals are constructed at runtime
+# so they never appear in any source line a regex (or this repo's local hook)
+# might scan. Operator opt-in: LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS env, default
+# all surfaces.
+_NEW_DESTRUCTIVE = {
+    "25-pretooluse-docker-stop":          "docker " + "stop n8n cloudflared",
+    "26-pretooluse-git-force-push-main":  "git "    + "push --force origin main",
+    "27-pretooluse-terraform-destroy":    "terraform " + "destroy -auto-approve",
+    "28-pretooluse-drop-table":           'psql -c "' + "DROP TABLE users;" + '"',
+    "29-pretooluse-systemctl-stop":       "systemctl " + "stop nginx",
+    "30-pretooluse-sed-overwrite-env":    "sed -i 's/key/newkey/' " + ".env.production",
+    "31-pretooluse-terraform-state-rm":   "terraform " + "state rm aws_db_instance.prod",
+    "32-pretooluse-kubectl-delete-namespace": "kubectl " + "delete namespace prod",
+    "33-pretooluse-aws-s3-rm-recursive":  "aws " + "s3 rm s3://prod-bucket --recursive",
+    "34-pretooluse-redis-flushall":       "redis-cli " + "FLUSHALL",
+}
+
+for name, command in _NEW_DESTRUCTIVE.items():
+    write_fixture(
+        "no-vibes",
+        "positive",
+        name,
+        {"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"command": command}},
+        expected=2,
+    )
+
+# Negative — safe ops with the same binaries should NOT block
+_NEW_DESTRUCTIVE_NEGATIVE = {
+    "23-docker-ps-safe":            "docker ps -a",
+    "24-git-push-feature-branch":   "git push origin feature/my-branch",
+    "25-terraform-plan-readonly":   "terraform plan -out=tfplan",
+    "26-kubectl-get-pods":          "kubectl get pods -A",
+}
+
+for name, command in _NEW_DESTRUCTIVE_NEGATIVE.items():
+    write_fixture(
+        "no-vibes",
+        "negative",
+        name,
+        {"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"command": command}},
+        expected=0,
+    )
+
 # Edge
 write_fixture("no-vibes", "edge", "01-empty-message", {"hook_event_name": "Stop", "last_assistant_message": ""})
 (ROOT / "no-vibes" / "edge" / "02-malformed-json.json").write_text("{this is not json\n", encoding="utf-8")

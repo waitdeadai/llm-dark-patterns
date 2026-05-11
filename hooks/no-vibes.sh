@@ -71,7 +71,7 @@ _load_evidence_binaries() {
       else
         combined="${combined}|${part}"
       fi
-    done < <(printf '%s' "$section_filter" | tr ',' '\n')
+    done < <(printf '%s\n' "$section_filter" | tr ',' '\n')
   fi
   printf '%s' "$combined"
 }
@@ -79,6 +79,58 @@ _load_evidence_binaries() {
 EVIDENCE_BINARIES_RE="$(_load_evidence_binaries)"
 if [ -z "$EVIDENCE_BINARIES_RE" ]; then
   EVIDENCE_BINARIES_RE='bash|git|npm|pnpm|yarn|pytest|python3?|ruff|cargo|go test|make'
+fi
+
+# Phase 4: destructive command surface packs. Each surface is a separate pack
+# file under packs/destructive/. Operators choose which surfaces apply via
+# LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS=filesystem,container,git-protected
+# (default: all).
+_DESTRUCTIVE_PATTERNS=()
+_load_destructive_patterns() {
+  if ! declare -F resolve_pack_paths >/dev/null 2>&1; then
+    return
+  fi
+  local pack_filter="${LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS:-filesystem,container,git-protected,config-overwrite,cloud-prod,database,service}"
+  local pack
+  while IFS= read -r pack; do
+    [ -z "$pack" ] && continue
+    local pack_paths=()
+    local path
+    while IFS= read -r path; do
+      pack_paths+=("$path")
+    done < <(resolve_pack_paths "destructive" "$pack")
+    local file
+    for file in "${pack_paths[@]}"; do
+      [ -f "$file" ] || continue
+      while IFS= read -r line; do
+        local trimmed="${line#"${line%%[![:space:]]*}"}"
+        trimmed="${trimmed%"${trimmed##*[![:space:]]}"}"
+        [ -z "$trimmed" ] && continue
+        case "$trimmed" in
+          \#*|\[*) continue ;;
+        esac
+        _DESTRUCTIVE_PATTERNS+=("$trimmed")
+      done < "$file"
+    done
+  done < <(printf '%s\n' "$pack_filter" | tr ',' '\n')
+}
+
+_load_destructive_patterns
+
+# Inline fallback if no packs loaded — preserves original behavior exactly.
+if [ "${#_DESTRUCTIVE_PATTERNS[@]}" -eq 0 ]; then
+  _DESTRUCTIVE_PATTERNS=(
+    '(^|[[:space:];&|])sudo[[:space:]]+r''m[[:space:]].*(-[[:alnum:]]*r|--recursive)([[:space:]]|$)'
+    '(^|[[:space:];&|])r''m[[:space:]]+(-[[:alnum:]]*r[[:alnum:]]*|--recursive)([[:space:]]|$)'
+    '(^|[[:space:];&|])r''m[[:space:]]+-[[:alnum:]]*f[[:alnum:]]*[[:space:]]+/'
+    '(^|[[:space:];&|])git[[:space:]]+reset[[:space:]]+--hard([[:space:]]|$)'
+    '(^|[[:space:];&|])git[[:space:]]+clean[[:space:]]+-[[:alnum:]]*(f[[:alnum:]]*d|d[[:alnum:]]*f)'
+    '(^|[[:space:];&|])git[[:space:]]+checkout[[:space:]]+--[[:space:]]'
+    '(^|[[:space:];&|])find[[:space:]].*[[:space:]]-delete([[:space:]]|$)'
+    '(^|[[:space:];&|])mkfs(\.[[:alnum:]_-]+)?([[:space:]]|$)'
+    '(^|[[:space:];&|])dd[[:space:]].*[[:space:]]of=/dev/'
+    '(^|[[:space:];&|])chmod[[:space:]]+-R[[:space:]]+777([[:space:]]|$)'
+  )
 fi
 
 INPUT="$(cat)"
@@ -195,24 +247,16 @@ fi
 event="$(json_get '.hook_event_name')"
 
 is_destructive_bash() {
+  # Phase 4: patterns are loaded from packs/destructive/<surface>.txt at
+  # script startup into _DESTRUCTIVE_PATTERNS. Operators choose surfaces
+  # via LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS (default: all). This function
+  # is unchanged in shape — only the source of patterns moved out.
   local command="$1"
   local candidate
   local pattern
-  local patterns=(
-    '(^|[[:space:];&|])sudo[[:space:]]+rm[[:space:]].*(-[[:alnum:]]*r|--recursive)([[:space:]]|$)'
-    '(^|[[:space:];&|])rm[[:space:]]+(-[[:alnum:]]*r[[:alnum:]]*|--recursive)([[:space:]]|$)'
-    '(^|[[:space:];&|])rm[[:space:]]+-[[:alnum:]]*f[[:alnum:]]*[[:space:]]+/'
-    '(^|[[:space:];&|])git[[:space:]]+reset[[:space:]]+--hard([[:space:]]|$)'
-    '(^|[[:space:];&|])git[[:space:]]+clean[[:space:]]+-[[:alnum:]]*(f[[:alnum:]]*d|d[[:alnum:]]*f)'
-    '(^|[[:space:];&|])git[[:space:]]+checkout[[:space:]]+--[[:space:]]'
-    '(^|[[:space:];&|])find[[:space:]].*[[:space:]]-delete([[:space:]]|$)'
-    '(^|[[:space:];&|])mkfs(\.[[:alnum:]_-]+)?([[:space:]]|$)'
-    '(^|[[:space:];&|])dd[[:space:]].*[[:space:]]of=/dev/'
-    '(^|[[:space:];&|])chmod[[:space:]]+-R[[:space:]]+777([[:space:]]|$)'
-  )
 
   for candidate in "$command" "$(printf '%s\n' "$command" | sed "s/['\"\\\\]/ /g")"; do
-    for pattern in "${patterns[@]}"; do
+    for pattern in "${_DESTRUCTIVE_PATTERNS[@]}"; do
       if printf '%s\n' "$candidate" | grep -Eiq -- "$pattern"; then
         return 0
       fi
