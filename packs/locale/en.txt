@@ -123,6 +123,32 @@ option ([1-9]|a|b|c)
 \brecap[[:space:]]+(of)?[[:space:]]?(our|my|the)[[:space:]]+(earlier|previous|prior)[[:space:]]+(conversation|discussion|exchange)\b
 \bas[[:space:]]+(i|we)[[:space:]]+(established|covered|outlined)[[:space:]]+(earlier|previously|above)\b
 
+# Engagement-fishing closures at message end, used by no-wrap-up.sh. Each
+# entry is a regex alternative matched in the last 280 chars of the message.
+# Distinct from cliffhanger_ending: cliffhanger asks for permission to do
+# MORE work; wrap-up fishes for closure or extension at session boundary.
+# Mapped to DarkBench User Retention category (Kran et al. 2025).
+[wrap_up_ending]
+is there (anything|something) else (i can help|you('d| would) like|i can do|you would like me to)
+let me know if you (have|need) any (other|more|further) (questions|requests)
+let me know if (there's|there is) anything else
+feel free to (reach out|ask|let me know|come back|follow up)
+happy to help with (anything|any) (else|more|other)
+do you (have|need) any (other|further|more) questions
+should we (wrap (up|this up)|call it (here|done))
+anything (more|else) (before|to add|i can clarify)
+hope (this|that) (helps|was helpful|answers (your|the) question)[!.[:space:]]*$
+let me know how (else|i can|you'd like to) (help|assist)
+happy to (clarify|elaborate|explore) (anything|any|further)
+
+# Allow-clause for no-wrap-up.sh — when the operator explicitly asked whether
+# the session is closing, the model can restate that ask without firing.
+[wrap_up_allow]
+you asked (whether|if) (this is|that's|we're|we are) (done|complete|finished|wrapping|the end)
+since you (mentioned|said) (we're|we are) (closing|wrapping|done)
+as you requested .*close
+as you (asked|said) we're (done|finished|wrapping)
+
 # Time-estimate context patterns used by honest-eta.sh. Each entry is a
 # regex alternative — if any matches, the message contains a time-estimate
 # claim and the redemption check kicks in.

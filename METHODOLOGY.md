@@ -87,6 +87,7 @@ Before shipping, look up the academic literature for the failure mode. As of 202
 - Time-estimation failure → [Frontiers in AI 2026 on Story Points / LLM-mediated cost drivers](https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2026.1772418/full), OpenAI Sep 2025 on training-rewarded bluffing.
 - False memory → [Pataranutaporn et al. 2024 (arXiv:2408.04681), original 3x false-memory finding](https://arxiv.org/abs/2408.04681), [ACM IUI 2025 follow-up "Slip Through the Chat" (doi:10.1145/3708359.3712112) on subtle in-conversation injection](https://dl.acm.org/doi/10.1145/3708359.3712112).
 - Paternalism → Anthropic's own [Constitution](https://www.anthropic.com/constitution) ("paternalism and moralizing are disrespectful").
+- Engagement-fishing closures ("anything else?" tails) → [DarkBench User Retention category (Kran et al. 2025, ICLR 2025, arXiv:2503.10728)](https://arxiv.org/abs/2503.10728) — "attempts to foster a sense of friendship with the user, especially in ways that misrepresent the chatbot's nature" / continued-engagement tactics. Caught by `no-wrap-up`.
 
 The literature serves three purposes:
 

@@ -219,6 +219,7 @@ HOOKS_TO_TEST=(
   "${HOOKS_DIR}/no-curfew.sh"
   "${HOOKS_DIR}/no-sycophancy.sh"
   "${HOOKS_DIR}/no-cliffhanger.sh"
+  "${HOOKS_DIR}/no-wrap-up.sh"
   "${HOOKS_DIR}/honest-eta.sh"
   "${HOOKS_DIR}/no-fake-recall.sh"
   "${HOOKS_DIR}/no-fake-stats.sh"

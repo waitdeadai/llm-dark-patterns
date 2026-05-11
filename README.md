@@ -40,9 +40,9 @@ The **LLM Dark Patterns Hooks** suite is the out-of-band complement: bash judges
 
 ## The suite
 
-Ten hooks live as of 2026-05-11, organized in three branches by mechanism:
+Eleven hooks live as of 2026-05-11, organized in three branches by mechanism:
 
-- **Interaction-style** (6): catch *how* the model talks. `no-vibes`, `time-anchor`, `no-curfew`, `no-sycophancy`, `no-cliffhanger`, `honest-eta`.
+- **Interaction-style** (7): catch *how* the model talks. `no-vibes`, `time-anchor`, `no-curfew`, `no-sycophancy`, `no-cliffhanger`, `no-wrap-up`, `honest-eta`.
 - **Fact-fabrication** (3): catch *what* the model claims. `no-fake-recall`, `no-fake-stats`, `no-fake-cite`.
 - **Continuity** (1): counter context loss rather than block dishonest output. `no-amnesia`.
 
@@ -59,6 +59,7 @@ Each is its own repo, single bash file (or bash + python3 for engine-heavier hoo
 | **no-curfew** | unsolicited rest/wellness paternalism | block paternalism vocabulary at turn-end with allow-clause for operator-requested rest content | [waitdeadai/no-curfew](https://github.com/waitdeadai/no-curfew) |
 | **no-sycophancy** | praise-spam at turn-open | inspect first 240 chars; block validation theater | [waitdeadai/no-sycophancy](https://github.com/waitdeadai/no-sycophancy) |
 | **no-cliffhanger** | dangling permission-loop endings | inspect last 320 chars; block "want me to continue?" with allow-clauses for partial-status and explicit choice | [waitdeadai/no-cliffhanger](https://github.com/waitdeadai/no-cliffhanger) |
+| **no-wrap-up** | engagement-fishing closures at message end (DarkBench User Retention) | inspect last 280 chars; block "anything else?" / "let me know if you need anything else" / "hope this helps!" + tail with allow-clause for operator-asked closure | [hooks/no-wrap-up.sh](hooks/no-wrap-up.sh) (umbrella-only) |
 | **honest-eta** | vibe time estimates + linear-scaling parallelism claims | block time-estimate vocabulary lacking Agent-Native Estimate shape or hedge range; always block linear-scaling | [waitdeadai/honest-eta](https://github.com/waitdeadai/honest-eta) |
 | **no-fake-recall** | false-memory recall ("as we discussed earlier" without quoted prior content) | block recall vocabulary unless message contains a markdown blockquote or 30+ char inline quote | [waitdeadai/no-fake-recall](https://github.com/waitdeadai/no-fake-recall) |
 | **no-fake-stats** | fabricated percentages, dollar amounts, large counts without source | block stat patterns unless message contains URL / "according to <Proper Noun>" / "(YYYY)" / strong neutral hedge | [waitdeadai/no-fake-stats](https://github.com/waitdeadai/no-fake-stats) |

@@ -1,7 +1,7 @@
 {
   "_comment": [
-    "LLM Dark Patterns Hooks — bundled plugin wiring for all 10 hooks.",
-    "Stop / SubagentStop fan out to 9 closeout-language hooks plus the state-stop continuity refresh.",
+    "LLM Dark Patterns Hooks — bundled plugin wiring for all 11 hooks.",
+    "Stop / SubagentStop fan out to 10 closeout-language hooks plus the state-stop continuity refresh.",
     "PreCompact / PostCompact / SessionStart wire the no-amnesia continuity branch.",
     "PreToolUse / PostToolUse / TaskCreated / TaskCompleted wire the no-vibes side checks.",
     "Each hook is independent — disable one by removing its entry."
@@ -18,6 +18,7 @@
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-recall.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-stats.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-cite.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-wrap-up.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/state-stop.sh\"", "timeout": 10 }
         ]
       }
@@ -32,7 +33,8 @@
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/honest-eta.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-recall.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-stats.sh\"", "timeout": 5 },
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-cite.sh\"", "timeout": 5 }
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-cite.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-wrap-up.sh\"", "timeout": 5 }
         ]
       }
     ],

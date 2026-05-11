@@ -34,7 +34,7 @@ jobs:
 
       - name: Verify each bundled hook script is executable
         run: |
-          for h in no-vibes time-anchor no-curfew no-sycophancy no-cliffhanger honest-eta \
+          for h in no-vibes time-anchor no-curfew no-sycophancy no-cliffhanger no-wrap-up honest-eta \
                    no-fake-recall no-fake-stats no-fake-cite \
                    state state-stop state-precompact state-postcompact state-sessionstart; do
             test -x hooks/${h}.sh || { echo "FAIL: hooks/${h}.sh not executable"; exit 1; }
@@ -73,6 +73,13 @@ jobs:
           printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"Want me to continue with the second migration?"}' > /tmp/t.json
           out="$(bash hooks/no-cliffhanger.sh < /tmp/t.json 2>&1; echo "EXIT=$?")"
           echo "$out" | grep -q "BLOCKED: dangling permission-loop" || exit 1
+          echo "$out" | grep -q "EXIT=2" || exit 1
+
+      - name: Smoke test — no-wrap-up ("Hope this helps!" closure → BLOCK)
+        run: |
+          printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"The function returns void. Hope this helps!"}' > /tmp/t.json
+          out="$(bash hooks/no-wrap-up.sh < /tmp/t.json 2>&1; echo "EXIT=$?")"
+          echo "$out" | grep -q "BLOCKED: engagement-fishing" || exit 1
           echo "$out" | grep -q "EXIT=2" || exit 1
 
       - name: Smoke test — honest-eta ("3 hours" no structure → BLOCK)
