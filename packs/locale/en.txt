@@ -38,3 +38,31 @@ incomplete
 unfinished
 never ran
 did not (run|execute|test|verify)
+
+# Praise-spam openers used by no-sycophancy.sh. Each entry is a regex
+# alternative matched at message open (after optional markdown markers).
+# Add new entries when Claude's praise vocabulary expands; native-speaker
+# PRs welcome to add equivalent forms in es.txt / pl.txt / etc.
+[sycophancy_opener]
+Great question[[:space:]]*(!|\.|,|—|–|-)
+Excellent question[[:space:]]*(!|\.|,|—|–|-)
+Brilliant question[[:space:]]*(!|\.|,|—|–|-)
+Perfect question[[:space:]]*(!|\.|,|—|–|-)
+Amazing question[[:space:]]*(!|\.|,|—|–|-)
+Fantastic question[[:space:]]*(!|\.|,|—|–|-)
+Wonderful question[[:space:]]*(!|\.|,|—|–|-)
+That's a (great|excellent|perfect|brilliant|wonderful|fantastic|amazing|fascinating|really good|very good|terrific) question
+You're absolutely right[!.,]
+You're (so |totally |completely )?correct[!.,]
+Absolutely[!.,]
+Of course[!.,]
+Excellent (point|observation|catch)[!.,]
+Great (point|catch|observation|insight|thinking)[!.,]
+Perfect[!.,]
+Brilliant[!.,]
+Wonderful[!.,]
+Amazing[!.,]
+Fantastic[!.,]
+What an (excellent|amazing|insightful|thoughtful) question
+Glad you asked
+Happy to help with that

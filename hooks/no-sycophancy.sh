@@ -7,8 +7,36 @@
 # 40 LLMs across 10 categories), and Li et al. 2026 (arXiv:2604.04735, AAAI
 # 2026 Spring Symposium) which puts sycophancy at 91.7% prevalence in the
 # co-creativity setting.
+#
+# Vocabulary is loaded from packs/locale/<lang>.txt section [sycophancy_opener].
+# The hook still works without packs — falls back to the inline English
+# default that matches the pre-pack behavior verbatim.
 
 set -euo pipefail
+
+# Load shared pack helper if available (plugin format ships lib/ as sibling).
+_HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$_HOOK_DIR/../lib/packs.sh" ]; then
+  # shellcheck source=../lib/packs.sh
+  source "$_HOOK_DIR/../lib/packs.sh"
+fi
+
+_load_sycophancy_with_fallback() {
+  local fallback="$1" loaded=""
+  if declare -F load_locale_section >/dev/null 2>&1; then
+    loaded="$(load_locale_section sycophancy_opener 2>/dev/null)"
+  fi
+  if [ -z "$loaded" ]; then
+    printf '%s' "$fallback"
+  else
+    printf '%s' "$loaded"
+  fi
+}
+
+# Inline fallback preserves the pre-pack behavior exactly.
+_SYCOPHANCY_FALLBACK='Great question[[:space:]]*(!|\.|,|—|–|-)|Excellent question[[:space:]]*(!|\.|,|—|–|-)|Brilliant question[[:space:]]*(!|\.|,|—|–|-)|Perfect question[[:space:]]*(!|\.|,|—|–|-)|Amazing question[[:space:]]*(!|\.|,|—|–|-)|Fantastic question[[:space:]]*(!|\.|,|—|–|-)|Wonderful question[[:space:]]*(!|\.|,|—|–|-)|That'\''s a (great|excellent|perfect|brilliant|wonderful|fantastic|amazing|fascinating|really good|very good|terrific) question|You'\''re absolutely right[!.,]|You'\''re (so |totally |completely )?correct[!.,]|Absolutely[!.,]|Of course[!.,]|Excellent (point|observation|catch)[!.,]|Great (point|catch|observation|insight|thinking)[!.,]|Perfect[!.,]|Brilliant[!.,]|Wonderful[!.,]|Amazing[!.,]|Fantastic[!.,]|What an (excellent|amazing|insightful|thoughtful) question|Glad you asked|Happy to help with that'
+
+SYCOPHANCY_OPENER_RE="$(_load_sycophancy_with_fallback "$_SYCOPHANCY_FALLBACK")"
 
 INPUT="$(cat)"
 
@@ -63,13 +91,11 @@ if printf '%s' "$opening" | grep -Eiq '(you (asked|wanted) (me )?(to (praise|com
 fi
 
 # Trigger: praise-spam vocabulary at message open.
-# Match the praise opener followed by sentence-ending punctuation OR a
-# dash/em-dash/en-dash (which Claude often uses to chain into the answer).
-# Use alternation `(!|\.|,|—|–|-)` instead of a bracket class because grep -E
-# does not treat multibyte UTF-8 chars (em-dash, en-dash) as single chars
-# inside `[...]`.
-PRAISE_TAIL='([[:space:]]*(!|\.|,|—|–|-))'
-SYCOPHANCY='^[[:space:]]*[*_>"#-]*[[:space:]]*(Great question'"$PRAISE_TAIL"'|Excellent question'"$PRAISE_TAIL"'|Brilliant question'"$PRAISE_TAIL"'|Perfect question'"$PRAISE_TAIL"'|Amazing question'"$PRAISE_TAIL"'|Fantastic question'"$PRAISE_TAIL"'|Wonderful question'"$PRAISE_TAIL"'|That'\''s a (great|excellent|perfect|brilliant|wonderful|fantastic|amazing|fascinating|really good|very good|terrific) question|You'\''re absolutely right[!.,]|You'\''re (so |totally |completely )?correct[!.,]|Absolutely[!.,]|Of course[!.,]|Excellent (point|observation|catch)[!.,]|Great (point|catch|observation|insight|thinking)[!.,]|Perfect[!.,]|Brilliant[!.,]|Wonderful[!.,]|Amazing[!.,]|Fantastic[!.,]|What an (excellent|amazing|insightful|thoughtful) question|Glad you asked|Happy to help with that)'
+# The opener vocabulary is loaded from packs/locale/<lang>.txt section
+# [sycophancy_opener]. Each pack entry is a self-contained regex alternative
+# (handles its own punctuation/dash tail). Hook wraps with a prefix that
+# allows leading markdown markers (>, *, #, -, ").
+SYCOPHANCY="^[[:space:]]*[*_>\"#-]*[[:space:]]*(${SYCOPHANCY_OPENER_RE})"
 
 if printf '%s' "$opening" | grep -Eiq "$SYCOPHANCY"; then
   block "praise-spam at turn open." \
