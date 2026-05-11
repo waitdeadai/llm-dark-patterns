@@ -149,6 +149,63 @@ since you (mentioned|said) (we're|we are) (closing|wrapping|done)
 as you requested .*close
 as you (asked|said) we're (done|finished|wrapping)
 
+# Phase A multi-agent orchestration sections.
+
+# Aggregator-hallucination claim phrases used by no-aggregator-hallucination.sh.
+# When these patterns fire WITHOUT [aggregator_evidence] present in the same
+# message, the hook blocks.
+[aggregator_claim]
+synthesizing[[:space:]]+(the[[:space:]]+)?(workers|agents|subagents|parallel[[:space:]]+(workers|agents))['"\47]?[[:space:]]+(results|findings|output|reports)
+based[[:space:]]+on[[:space:]]+(the[[:space:]]+)?(workers|agents|subagents)['"\47]?[[:space:]]+(results|findings|output|reports|work)
+combining[[:space:]]+(the[[:space:]]+)?(results|outputs|findings)[[:space:]]+from[[:space:]]+([0-9]+|all|the)[[:space:]]+(workers|agents|subagents)
+aggregating[[:space:]]+(the[[:space:]]+)?(results|findings)[[:space:]]+from[[:space:]]+([0-9]+|all|the)?[[:space:]]?(workers|agents|subagents)
+consensus[[:space:]]+(across|among|from)[[:space:]]+(the[[:space:]]+)?([0-9]+|all|the|multiple)[[:space:]]+(workers|agents|subagents)
+the[[:space:]]+(workers|agents|subagents)[[:space:]]+(all[[:space:]]+)?(report|reported|conclude|concluded|agreed|agree)
+
+# Per-worker evidence patterns used by no-aggregator-hallucination.sh as
+# redemption. Quoted worker_id, agent_N: enumeration, or blockquote of worker
+# text counts as evidence.
+[aggregator_evidence]
+worker[[:space:]_-]*[0-9]+[[:space:]]*[:=]
+agent[[:space:]_-]*[0-9]+[[:space:]]*[:=]
+subagent[[:space:]_-]*[0-9]+[[:space:]]*[:=]
+worker[[:space:]_-]*(id|name)[[:space:]]*[:=]
+`?worker_[a-zA-Z0-9_-]+`?[[:space:]]*[:=]
+^>[[:space:]]+\S
+
+# Worker-rollup claim phrases used by no-silent-worker-success.sh.
+[worker_rollup_claim]
+all[[:space:]]+([0-9]+|the[[:space:]]+([0-9]+))[[:space:]]+(workers|agents|subagents|lanes|instances|parallel[[:space:]]+(agents|workers|instances))[[:space:]]+(completed|finished|done|succeeded|are[[:space:]]+done|have[[:space:]]+completed)
+spawned[[:space:]]+([0-9]+)[[:space:]]+(workers|agents|subagents)[^[:cntrl:]]{0,80}(all[[:space:]]+(done|completed|finished|succeeded))
+([0-9]+|all)[[:space:]]+(parallel|concurrent)[[:space:]]+(agents|workers|instances|subagents)[[:space:]]+(finished|completed|done|succeeded)
+every[[:space:]]+(worker|agent|subagent)[[:space:]]+(succeeded|finished|completed|reported[[:space:]]+success)
+the[[:space:]]+([0-9]+|N)[[:space:]]+(workers|agents)[[:space:]]+all[[:space:]]+(succeeded|completed|finished|reported[[:space:]]+success)
+
+# Per-worker exit code / status evidence used by no-silent-worker-success.sh
+# as redemption.
+[worker_per_worker_evidence]
+worker[[:space:]_-]*[0-9]+[[:space:]]*[:=].*(exit|status|result|output)
+agent[[:space:]_-]*[0-9]+[[:space:]]*[:=].*(exit|status|result|output)
+subagent[[:space:]_-]*[0-9]+[[:space:]]*[:=].*(exit|status|result|output)
+exit[[:space:]_]code[[:space:]]*[:=][[:space:]]*0.*exit[[:space:]_]code[[:space:]]*[:=][[:space:]]*0
+`worker_[a-zA-Z0-9_-]+`[^`]*(exit|status|result)
+
+# Cherry-pick partial-success phrases used by no-cherry-pick-rollup.sh.
+[cherry_pick_partial]
+\b([0-9]+)[[:space:]]*(out[[:space:]]+of|of|/)[[:space:]]*([0-9]+)[[:space:]]+(workers|agents|subagents|lanes|instances|tasks)[[:space:]]+(succeeded|completed|finished|passed|reported[[:space:]]+success)
+\b([0-9]+)[[:space:]]+(workers|agents|subagents|lanes|tasks)[[:space:]]+(failed|errored|timed[[:space:]]+out|crashed)
+the[[:space:]]+(other|remaining)[[:space:]]+([0-9]+)[[:space:]]+(workers|agents|subagents)[[:space:]]+(failed|errored|did[[:space:]]+not)
+
+# Failed-worker-handled redemption phrases used by no-cherry-pick-rollup.sh.
+[cherry_pick_handled]
+(failed|errored|crashed|timed[[:space:]]+out)[[:space:]]+(workers?|agents?|subagents?)[[:space:]]+(because|due[[:space:]]+to|with[[:space:]]+error)
+will[[:space:]]+retry[[:space:]]+(the[[:space:]]+)?failed
+requeued[[:space:]]+(the[[:space:]]+)?failed
+the[[:space:]]+failed[[:space:]]+(workers?|agents?|tasks?)[[:space:]]+(blocked|caused|require)
+blocker[[:space:]]+(from|on)[[:space:]]+the[[:space:]]+failed
+status[[:space:]]*:[[:space:]]*(partial|blocked)
+next[[:space:]]+step[[:space:]]*:[[:space:]]+(retry|investigate|fix)[[:space:]]+(the[[:space:]]+)?failed
+
 # Time-estimate context patterns used by honest-eta.sh. Each entry is a
 # regex alternative — if any matches, the message contains a time-estimate
 # claim and the redemption check kicks in.
