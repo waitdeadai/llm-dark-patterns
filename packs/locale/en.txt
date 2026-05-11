@@ -43,6 +43,130 @@ did not (run|execute|test|verify)
 # alternative matched at message open (after optional markdown markers).
 # Add new entries when Claude's praise vocabulary expands; native-speaker
 # PRs welcome to add equivalent forms in es.txt / pl.txt / etc.
+# Unsolicited rest/wellness paternalism vocabulary used by no-curfew.sh.
+# Each entry is a regex alternative; the hook wraps the full set in word
+# boundaries.
+[paternalism]
+go to sleep
+get some sleep
+get some rest
+take a break
+save it for tomorrow
+tomorrow morning
+call it a night
+rest up
+step away
+log off
+wind down
+your wellbeing
+your well-being
+take care of yourself
+burnout
+burned out
+you've earned (a |some )?(rest|break)
+it's (late|getting late)
+the work can wait
+come back fresh
+recharge
+self-care
+mental health break
+you should stop
+sleep matters
+sleep is important
+grab some sleep
+give yourself a break
+easy on yourself
+don't push yourself
+
+# Operator-asked-for-rest allow clause used by no-curfew.sh — when the
+# model restates an explicit operator request for rest/break advice, the
+# hook does NOT fire. Each entry is a regex alternative.
+[paternalism_allow]
+you (asked|requested) (for|about) (a break|rest|sleep|self-care)
+since you (mentioned|said) you (are|were|feel) tired
+as you requested .*break
+
+# Permission-loop endings used by no-cliffhanger.sh. Each entry is a
+# regex alternative matched in the last 320 chars of the message.
+[cliffhanger_ending]
+let me know if you[[:space:]]*('d|[[:space:]]+(would|want|wanted|need|needed|would like|d like))?[[:space:]]*(me to )?[[:space:]]*(like[[:space:]]+)?(me[[:space:]]+to[[:space:]]+)?(continue|proceed|expand|elaborate|dig deeper|go further|do more|keep going|move on|do that)
+happy to (continue|expand|elaborate|dig deeper|go further|help (with the )?next|provide more|do (that|this|more))
+want me to (continue|proceed|expand|elaborate|dig deeper|keep going|do (that|this|more))
+should I (continue|proceed|go ahead|move on|expand|elaborate|do (that|this))
+shall I (continue|proceed|go ahead|move on|do that)
+ready when you are
+just (let me know|say the word)
+say the word and I( |')ll
+let me know how (you'd like to|you want to) proceed
+
+# Allow clauses for no-cliffhanger.sh — a structured close (Status:/Next
+# step:) or an explicit Y/N choice prompt is fine.
+[cliffhanger_allow]
+Next step:
+Status: (partial|blocked|verified)
+\(y/n\)
+\([yY]/[nN]\)
+reply with `?(go|yes|no|stop|continue|stop|abort|skip)`?
+pick one of:
+choose (one|a|b|c)
+option ([1-9]|a|b|c)
+
+# False-memory recall phrases used by no-fake-recall.sh. Each entry is a
+# regex alternative matched anywhere in the message.
+[recall_phrase]
+\b(as|like)[[:space:]]+(we|i|you[[:space:]]+and[[:space:]]+i)[[:space:]]+(discussed|mentioned|talked[[:space:]]+about|covered|noted|established|agreed)\b
+\bas[[:space:]]+(i|we)[[:space:]]+(mentioned|said|noted|stated|explained|told[[:space:]]+you|wrote)[[:space:]]+(earlier|before|previously|above|in[[:space:]]+(my|the)[[:space:]]+(last|previous|prior))\b
+\bfrom[[:space:]]+(my|our|the)[[:space:]]+(previous|earlier|prior|last)[[:space:]]+(response|message|turn|reply|conversation|exchange)\b
+\b(you|i)[[:space:]]+(mentioned|said|told[[:space:]]+(me|you))[[:space:]]+(earlier|before|previously)\b
+\bremember[[:space:]]+(when|how|that)[[:space:]]+(we|i|you)[[:space:]]+(discussed|talked|covered)\b
+\bbuilding[[:space:]]+on[[:space:]]+what[[:space:]]+(we|i|you)[[:space:]]+(said|discussed|covered|established)\b
+\brecap[[:space:]]+(of)?[[:space:]]?(our|my|the)[[:space:]]+(earlier|previous|prior)[[:space:]]+(conversation|discussion|exchange)\b
+\bas[[:space:]]+(i|we)[[:space:]]+(established|covered|outlined)[[:space:]]+(earlier|previously|above)\b
+
+# Time-estimate context patterns used by honest-eta.sh. Each entry is a
+# regex alternative — if any matches, the message contains a time-estimate
+# claim and the redemption check kicks in.
+[eta_context]
+\b([0-9]+([-.][0-9]+)?)[[:space:]]*(min|minute|hour|hr|day|week|wk|month|mo|year|yr|sprint)s?\b
+\bETA[: ]
+\bestimated time
+\btime to (deliver|ship|complete|implement|finish|land)
+\bshould take (about|around|roughly|approximately)?[[:space:]]?[0-9]
+\bwill take (about|around|roughly|approximately)?[[:space:]]?[0-9]
+\bcompletion in [0-9]
+\bready in (about|around)?[[:space:]]?[0-9]
+
+# Linear-scaling claims used by honest-eta.sh. Always wrong for real agent
+# work; always blocked.
+[eta_linear_scaling]
+\b[0-9]+x[[:space:]]+(faster|speedup|speed-?up)
+with[[:space:]]+[0-9]+[[:space:]]+(agents|lanes|workers).*[0-9]+x
+linear(ly)?[[:space:]]+scal(es|ing|able)
+divid(ed|ing)[[:space:]]+by[[:space:]]+(lane|agent)[[:space:]]+count
+per[- ]lane[[:space:]]+speedup
+N[[:space:]]+agents[[:space:]]*=[[:space:]]*N x
+
+# Agent-Native Estimate redemption shape — when the message contains any of
+# these structured fields, the time estimate is treated as honest.
+[eta_agent_native]
+agent[[:space:]_]wall[[:space:]_]clock
+agent[[:space:]_]hours
+human[[:space:]_]touch[[:space:]_]time
+calendar[[:space:]_]blockers
+critical[[:space:]_]path
+estimate[[:space:]_]type[: ]+(agent-native|human-equivalent|blocked|unknown)
+optimistic[[:space:],/]+(.*)?[[:space:]]?likely[[:space:],/]+(.*)?[[:space:]]?pessimistic
+confidence[: ]+(high|medium|low|unknown)([[:space:],]+with[[:space:]]+downgrade)?
+insufficient_data
+
+# Honest hedge-range redemption — partial credit for "optimistic / likely /
+# pessimistic" or "between X and Y" framings.
+[eta_hedge_range]
+\b(optimistic|likely|pessimistic|worst[- ]case|best[- ]case|p50|p90|range)[: ]+
+approximately[[:space:]]+[0-9]+[[:space:]]*-[[:space:]]*[0-9]+
+\bsomewhere between[[:space:]]+[0-9]+
+\bcould be anywhere from
+
 [sycophancy_opener]
 Great question[[:space:]]*(!|\.|,|—|–|-)
 Excellent question[[:space:]]*(!|\.|,|—|–|-)

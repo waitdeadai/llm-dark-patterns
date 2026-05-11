@@ -13,6 +13,29 @@
 
 set -euo pipefail
 
+_HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$_HOOK_DIR/../lib/packs.sh" ]; then
+  # shellcheck source=../lib/packs.sh
+  source "$_HOOK_DIR/../lib/packs.sh"
+fi
+
+_load_or_fallback() {
+  local section="$1" fallback="$2" loaded=""
+  if declare -F load_locale_section >/dev/null 2>&1; then
+    loaded="$(load_locale_section "$section" 2>/dev/null)"
+  fi
+  if [ -z "$loaded" ]; then
+    printf '%s' "$fallback"
+  else
+    printf '%s' "$loaded"
+  fi
+}
+
+ETA_CONTEXT_RE="$(_load_or_fallback eta_context '\b([0-9]+([-.][0-9]+)?)[[:space:]]*(min|minute|hour|hr|day|week|wk|month|mo|year|yr|sprint)s?\b|\bETA[: ]|\bestimated time|\btime to (deliver|ship|complete|implement|finish|land)|\bshould take (about|around|roughly|approximately)?[[:space:]]?[0-9]|\bwill take (about|around|roughly|approximately)?[[:space:]]?[0-9]|\bcompletion in [0-9]|\bready in (about|around)?[[:space:]]?[0-9]')"
+LINEAR_SCALING_RE="$(_load_or_fallback eta_linear_scaling '\b[0-9]+x[[:space:]]+(faster|speedup|speed-?up)|with[[:space:]]+[0-9]+[[:space:]]+(agents|lanes|workers).*[0-9]+x|linear(ly)?[[:space:]]+scal(es|ing|able)|divid(ed|ing)[[:space:]]+by[[:space:]]+(lane|agent)[[:space:]]+count|per[- ]lane[[:space:]]+speedup|N[[:space:]]+agents[[:space:]]*=[[:space:]]*N x')"
+AGENT_NATIVE_RE="$(_load_or_fallback eta_agent_native 'agent[[:space:]_]wall[[:space:]_]clock|agent[[:space:]_]hours|human[[:space:]_]touch[[:space:]_]time|calendar[[:space:]_]blockers|critical[[:space:]_]path|estimate[[:space:]_]type[: ]+(agent-native|human-equivalent|blocked|unknown)|optimistic[[:space:],/]+(.*)?[[:space:]]?likely[[:space:],/]+(.*)?[[:space:]]?pessimistic|confidence[: ]+(high|medium|low|unknown)([[:space:],]+with[[:space:]]+downgrade)?|insufficient_data')"
+HEDGE_RANGE_RE="$(_load_or_fallback eta_hedge_range '\b(optimistic|likely|pessimistic|worst[- ]case|best[- ]case|p50|p90|range)[: ]+|approximately[[:space:]]+[0-9]+[[:space:]]*-[[:space:]]*[0-9]+|\bsomewhere between[[:space:]]+[0-9]+|\bcould be anywhere from')"
+
 INPUT="$(cat)"
 
 if ! command -v jq >/dev/null 2>&1; then
@@ -57,7 +80,8 @@ if [ -z "$message" ]; then
 fi
 
 # Step 1 — does the message contain a time-estimate claim?
-ETA_CONTEXT='(\b([0-9]+([-.][0-9]+)?)[[:space:]]*(min|minute|hour|hr|day|week|wk|month|mo|year|yr|sprint)s?\b|\bETA[: ]|\bestimated time|\btime to (deliver|ship|complete|implement|finish|land)|\bshould take (about|around|roughly|approximately)?[[:space:]]?[0-9]|\bwill take (about|around|roughly|approximately)?[[:space:]]?[0-9]|\bcompletion in [0-9]|\bready in (about|around)?[[:space:]]?[0-9])'
+# Vocab loaded from packs/locale/<lang>.txt section [eta_context].
+ETA_CONTEXT="(${ETA_CONTEXT_RE})"
 
 HAS_ETA=$(printf '%s\n' "$message" | grep -Eic "$ETA_CONTEXT" || true)
 
@@ -66,7 +90,8 @@ if [ "$HAS_ETA" -eq 0 ]; then
 fi
 
 # Step 2 — linear-scaling claims are always bad, regardless of context.
-LINEAR_SCALING='(\b[0-9]+x[[:space:]]+(faster|speedup|speed-?up)|with[[:space:]]+[0-9]+[[:space:]]+(agents|lanes|workers).*[0-9]+x|linear(ly)?[[:space:]]+scal(es|ing|able)|divid(ed|ing)[[:space:]]+by[[:space:]]+(lane|agent)[[:space:]]+count|per[- ]lane[[:space:]]+speedup|N[[:space:]]+agents[[:space:]]*=[[:space:]]*N x)'
+# Vocab loaded from packs/locale/<lang>.txt section [eta_linear_scaling].
+LINEAR_SCALING="(${LINEAR_SCALING_RE})"
 
 if printf '%s\n' "$message" | grep -Eiq "$LINEAR_SCALING"; then
   block "linear-scaling claim in time estimate — agents don't divide work by lane count." \
@@ -79,11 +104,13 @@ if printf '%s\n' "$message" | grep -Eiq "$LINEAR_SCALING"; then
 fi
 
 # Step 3 — redemption: Agent-Native Estimate structured fields.
-AGENT_NATIVE='(agent[[:space:]_]wall[[:space:]_]clock|agent[[:space:]_]hours|human[[:space:]_]touch[[:space:]_]time|calendar[[:space:]_]blockers|critical[[:space:]_]path|estimate[[:space:]_]type[: ]+(agent-native|human-equivalent|blocked|unknown)|optimistic[[:space:],/]+(.*)?[[:space:]]?likely[[:space:],/]+(.*)?[[:space:]]?pessimistic|confidence[: ]+(high|medium|low|unknown)([[:space:],]+with[[:space:]]+downgrade)?|insufficient_data)'
+# Vocab loaded from packs/locale/<lang>.txt section [eta_agent_native].
+AGENT_NATIVE="(${AGENT_NATIVE_RE})"
 
 # Step 4 — also accept honest hedge ranges as partial redemption when an
 # operator only asked for a rough number.
-HEDGE_RANGE='(\b(optimistic|likely|pessimistic|worst[- ]case|best[- ]case|p50|p90|range)[: ]+|approximately[[:space:]]+[0-9]+[[:space:]]*-[[:space:]]*[0-9]+|\bsomewhere between[[:space:]]+[0-9]+|\bcould be anywhere from)'
+# Vocab loaded from packs/locale/<lang>.txt section [eta_hedge_range].
+HEDGE_RANGE="(${HEDGE_RANGE_RE})"
 
 HAS_AGENT_NATIVE=$(printf '%s\n' "$message" | grep -Eic "$AGENT_NATIVE" || true)
 HAS_HEDGE=$(printf '%s\n' "$message" | grep -Eic "$HEDGE_RANGE" || true)

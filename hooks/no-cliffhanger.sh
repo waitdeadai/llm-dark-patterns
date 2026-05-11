@@ -3,8 +3,32 @@
 # Bash judge, out-of-band. Catches the dark pattern of forcing the operator to
 # re-authorize work the model could just complete. Different from anti-hesitation
 # tools (which catch early-exit phrases) — this catches END-OF-MESSAGE drift.
+#
+# Vocabulary loaded from packs/locale/<lang>.txt sections [cliffhanger_ending]
+# and [cliffhanger_allow]. Inline English fallback preserves pre-pack behavior.
 
 set -euo pipefail
+
+_HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$_HOOK_DIR/../lib/packs.sh" ]; then
+  # shellcheck source=../lib/packs.sh
+  source "$_HOOK_DIR/../lib/packs.sh"
+fi
+
+_load_or_fallback() {
+  local section="$1" fallback="$2" loaded=""
+  if declare -F load_locale_section >/dev/null 2>&1; then
+    loaded="$(load_locale_section "$section" 2>/dev/null)"
+  fi
+  if [ -z "$loaded" ]; then
+    printf '%s' "$fallback"
+  else
+    printf '%s' "$loaded"
+  fi
+}
+
+CLIFFHANGER_RE="$(_load_or_fallback cliffhanger_ending 'let me know if you[[:space:]]*('\''d|[[:space:]]+(would|want|wanted|need|needed|would like|d like))?[[:space:]]*(me to )?[[:space:]]*(like[[:space:]]+)?(me[[:space:]]+to[[:space:]]+)?(continue|proceed|expand|elaborate|dig deeper|go further|do more|keep going|move on|do that)|happy to (continue|expand|elaborate|dig deeper|go further|help (with the )?next|provide more|do (that|this|more))|want me to (continue|proceed|expand|elaborate|dig deeper|keep going|do (that|this|more))|should I (continue|proceed|go ahead|move on|expand|elaborate|do (that|this))|shall I (continue|proceed|go ahead|move on|do that)|ready when you are|just (let me know|say the word)|say the word and I( |'\'')ll|let me know how (you'\''d like to|you want to) proceed')"
+CLIFFHANGER_ALLOW_RE="$(_load_or_fallback cliffhanger_allow 'Next step:|Status: (partial|blocked|verified)|\(y/n\)|\([yY]/[nN]\)|reply with `?(go|yes|no|stop|continue|stop|abort|skip)`?|pick one of:|choose (one|a|b|c)|option ([1-9]|a|b|c)')"
 
 INPUT="$(cat)"
 
@@ -52,20 +76,16 @@ fi
 # Inspect last 320 characters — cliffhangers live at message end.
 ending="$(printf '%s' "$message" | tail -c 320)"
 
-# Allow-clause: legitimate "Next step:" / "Status: partial" closures from
-# verification frameworks already supply the right shape.
-if printf '%s' "$ending" | grep -Eiq '(Next step:|Status: (partial|blocked|verified))'; then
+# Allow-clause: legitimate "Next step:" / "Status:" closures from
+# verification frameworks, or explicit operator decision points (Y/N, A/B/C).
+# Allow vocab is loaded from packs/locale/<lang>.txt section [cliffhanger_allow].
+if printf '%s' "$ending" | grep -Eiq "(${CLIFFHANGER_ALLOW_RE})"; then
   exit 0
 fi
 
-# Allow-clause: explicit operator decision points (Y/N, A/B/C, multiple-choice).
-if printf '%s' "$ending" | grep -Eiq '(\(y/n\)|\([yY]/[nN]\)|reply with `?(go|yes|no|stop|continue|stop|abort|skip)`?|pick one of:|choose (one|a|b|c)|option ([1-9]|a|b|c))'; then
-  exit 0
-fi
-
-# Trigger: dangling permission-loop endings (anywhere in last 320 chars).
-# Note the apostrophe-tolerant variants for `'d like` and `you'd`.
-CLIFFHANGER='(let me know if you[[:space:]]*('\''d|[[:space:]]+(would|want|wanted|need|needed|would like|d like))?[[:space:]]*(me to )?[[:space:]]*(like[[:space:]]+)?(me[[:space:]]+to[[:space:]]+)?(continue|proceed|expand|elaborate|dig deeper|go further|do more|keep going|move on|do that)|happy to (continue|expand|elaborate|dig deeper|go further|help (with the )?next|provide more|do (that|this|more))|want me to (continue|proceed|expand|elaborate|dig deeper|keep going|do (that|this|more))|should I (continue|proceed|go ahead|move on|expand|elaborate|do (that|this))|shall I (continue|proceed|go ahead|move on|do that)|ready when you are|just (let me know|say the word)|say the word and I( |'\'')ll|let me know how (you'\''d like to|you want to) proceed)'
+# Trigger: dangling permission-loop endings loaded from packs/locale/<lang>.txt
+# section [cliffhanger_ending]. Apostrophe-tolerant for `'d like` / `you'd`.
+CLIFFHANGER="(${CLIFFHANGER_RE})"
 
 if printf '%s' "$ending" | grep -Eiq "$CLIFFHANGER"; then
   block "dangling permission-loop ending." \

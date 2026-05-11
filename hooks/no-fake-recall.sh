@@ -3,8 +3,31 @@
 # earlier" / "as I mentioned before" / "from my previous response".
 # LLMs frequently hallucinate prior conversation content. The fix is for the
 # model to either quote the verbatim prior content or use neutral phrasing.
+#
+# Vocabulary loaded from packs/locale/<lang>.txt section [recall_phrase].
+# Inline English fallback preserves pre-pack behavior.
 
 set -euo pipefail
+
+_HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$_HOOK_DIR/../lib/packs.sh" ]; then
+  # shellcheck source=../lib/packs.sh
+  source "$_HOOK_DIR/../lib/packs.sh"
+fi
+
+_load_or_fallback() {
+  local section="$1" fallback="$2" loaded=""
+  if declare -F load_locale_section >/dev/null 2>&1; then
+    loaded="$(load_locale_section "$section" 2>/dev/null)"
+  fi
+  if [ -z "$loaded" ]; then
+    printf '%s' "$fallback"
+  else
+    printf '%s' "$loaded"
+  fi
+}
+
+RECALL_RE="$(_load_or_fallback recall_phrase '\b(as|like)[[:space:]]+(we|i|you[[:space:]]+and[[:space:]]+i)[[:space:]]+(discussed|mentioned|talked[[:space:]]+about|covered|noted|established|agreed)\b|\bas[[:space:]]+(i|we)[[:space:]]+(mentioned|said|noted|stated|explained|told[[:space:]]+you|wrote)[[:space:]]+(earlier|before|previously|above|in[[:space:]]+(my|the)[[:space:]]+(last|previous|prior))\b|\bfrom[[:space:]]+(my|our|the)[[:space:]]+(previous|earlier|prior|last)[[:space:]]+(response|message|turn|reply|conversation|exchange)\b|\b(you|i)[[:space:]]+(mentioned|said|told[[:space:]]+(me|you))[[:space:]]+(earlier|before|previously)\b|\bremember[[:space:]]+(when|how|that)[[:space:]]+(we|i|you)[[:space:]]+(discussed|talked|covered)\b|\bbuilding[[:space:]]+on[[:space:]]+what[[:space:]]+(we|i|you)[[:space:]]+(said|discussed|covered|established)\b|\brecap[[:space:]]+(of)?[[:space:]]?(our|my|the)[[:space:]]+(earlier|previous|prior)[[:space:]]+(conversation|discussion|exchange)\b|\bas[[:space:]]+(i|we)[[:space:]]+(established|covered|outlined)[[:space:]]+(earlier|previously|above)\b')"
 
 INPUT="$(cat)"
 
@@ -49,8 +72,9 @@ if [ -z "$message" ]; then
   exit 0
 fi
 
-# Trigger: false-memory recall vocabulary
-RECALL='(\b(as|like)[[:space:]]+(we|i|you[[:space:]]+and[[:space:]]+i)[[:space:]]+(discussed|mentioned|talked[[:space:]]+about|covered|noted|established|agreed)\b|\bas[[:space:]]+(i|we)[[:space:]]+(mentioned|said|noted|stated|explained|told[[:space:]]+you|wrote)[[:space:]]+(earlier|before|previously|above|in[[:space:]]+(my|the)[[:space:]]+(last|previous|prior))\b|\bfrom[[:space:]]+(my|our|the)[[:space:]]+(previous|earlier|prior|last)[[:space:]]+(response|message|turn|reply|conversation|exchange)\b|\b(you|i)[[:space:]]+(mentioned|said|told[[:space:]]+(me|you))[[:space:]]+(earlier|before|previously)\b|\bremember[[:space:]]+(when|how|that)[[:space:]]+(we|i|you)[[:space:]]+(discussed|talked|covered)\b|\bbuilding[[:space:]]+on[[:space:]]+what[[:space:]]+(we|i|you)[[:space:]]+(said|discussed|covered|established)\b|\brecap[[:space:]]+(of)?[[:space:]]?(our|my|the)[[:space:]]+(earlier|previous|prior)[[:space:]]+(conversation|discussion|exchange)\b|\bas[[:space:]]+(i|we)[[:space:]]+(established|covered|outlined)[[:space:]]+(earlier|previously|above)\b)'
+# Trigger: false-memory recall vocabulary loaded from packs/locale/<lang>.txt
+# section [recall_phrase].
+RECALL="(${RECALL_RE})"
 
 if printf '%s\n' "$message" | grep -Eiq "$RECALL"; then
   # Allow-clause: the model is quoting verbatim prior content (proves it actually saw it).
