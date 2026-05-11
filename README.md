@@ -24,7 +24,7 @@ The **LLM Dark Patterns Hooks** suite is the out-of-band complement: bash judges
 
 ## The suite
 
-Six hooks live as of 2026-05-11. Each is its own repo, single bash file, Apache-2.0, drop-in via `.claude/settings.json`, with reproducible-test receipts.
+Nine hooks live as of 2026-05-11. The first six are interaction-style hooks; the last three (`no-fake-recall`, `no-fake-stats`, `no-fake-cite`) are the *fact-fabrication* branch — they catch hallucinated content rather than annoying interaction defaults. Each is its own repo, single bash file, Apache-2.0, drop-in via `.claude/settings.json`, with reproducible-test receipts.
 
 | Hook | Dark pattern | Mechanism | Repo |
 |---|---|---|---|
@@ -34,6 +34,9 @@ Six hooks live as of 2026-05-11. Each is its own repo, single bash file, Apache-
 | **no-sycophancy** | praise-spam at turn-open | inspect first 240 chars; block validation theater | [waitdeadai/no-sycophancy](https://github.com/waitdeadai/no-sycophancy) |
 | **no-cliffhanger** | dangling permission-loop endings | inspect last 320 chars; block "want me to continue?" with allow-clauses for partial-status and explicit choice | [waitdeadai/no-cliffhanger](https://github.com/waitdeadai/no-cliffhanger) |
 | **honest-eta** | vibe time estimates + linear-scaling parallelism claims | block time-estimate vocabulary lacking Agent-Native Estimate shape or hedge range; always block linear-scaling | [waitdeadai/honest-eta](https://github.com/waitdeadai/honest-eta) |
+| **no-fake-recall** | false-memory recall ("as we discussed earlier" without quoted prior content) | block recall vocabulary unless message contains a markdown blockquote or 30+ char inline quote | [waitdeadai/no-fake-recall](https://github.com/waitdeadai/no-fake-recall) |
+| **no-fake-stats** | fabricated percentages, dollar amounts, large counts without source | block stat patterns unless message contains URL / "according to <Proper Noun>" / "(YYYY)" / strong neutral hedge | [waitdeadai/no-fake-stats](https://github.com/waitdeadai/no-fake-stats) |
+| **no-fake-cite** | citation patterns ("Smith et al., 2023", "[1]", "doi:") without verifiable URL | block citation patterns unless message contains a `https://` URL | [waitdeadai/no-fake-cite](https://github.com/waitdeadai/no-fake-cite) |
 
 ## Architecture (the pattern that generalizes)
 
@@ -50,7 +53,7 @@ This pattern composes. If you find a sixth dark pattern with a clean textual sig
 
 ```bash
 mkdir -p .claude/hooks
-for hook in no-vibes time-anchor no-curfew no-sycophancy no-cliffhanger honest-eta; do
+for hook in no-vibes time-anchor no-curfew no-sycophancy no-cliffhanger honest-eta no-fake-recall no-fake-stats no-fake-cite; do
   curl -fsSL "https://raw.githubusercontent.com/waitdeadai/${hook}/main/${hook}.sh" \
     -o ".claude/hooks/${hook}.sh"
   chmod +x ".claude/hooks/${hook}.sh"
