@@ -1,0 +1,127 @@
+name: tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  bundle:
+    name: Bundled-plugin smoke tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify dependencies
+        run: |
+          jq --version
+          python3 --version
+          bash --version | head -1
+
+      - name: Validate .claude-plugin/plugin.json
+        run: |
+          jq -e . .claude-plugin/plugin.json > /dev/null
+          jq -e '.name == "llm-dark-patterns"' .claude-plugin/plugin.json > /dev/null
+          jq -e '.license == "Apache-2.0"' .claude-plugin/plugin.json > /dev/null
+
+      - name: Validate hooks/hooks.json
+        run: |
+          jq -e . hooks/hooks.json > /dev/null
+          # Confirm all 10 wired events are present
+          for ev in Stop SubagentStop PreToolUse PostToolUse TaskCreated TaskCompleted PreCompact PostCompact SessionStart UserPromptSubmit; do
+            jq -e ".hooks[\"$ev\"]" hooks/hooks.json > /dev/null
+          done
+
+      - name: Verify each bundled hook script is executable
+        run: |
+          for h in no-vibes time-anchor no-curfew no-sycophancy no-cliffhanger honest-eta \
+                   no-fake-recall no-fake-stats no-fake-cite \
+                   state state-stop state-precompact state-postcompact state-sessionstart; do
+            test -x hooks/${h}.sh || { echo "FAIL: hooks/${h}.sh not executable"; exit 1; }
+            bash -n hooks/${h}.sh || { echo "FAIL: hooks/${h}.sh syntax error"; exit 1; }
+          done
+
+      - name: Smoke test — no-vibes (positive closeout no evidence → BLOCK)
+        run: |
+          printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"The feature is now implemented and ready."}' > /tmp/t.json
+          out="$(bash hooks/no-vibes.sh < /tmp/t.json 2>&1; echo "EXIT=$?")"
+          echo "$out" | grep -q "BLOCKED" || exit 1
+          echo "$out" | grep -q "EXIT=2" || exit 1
+
+      - name: Smoke test — time-anchor (text mode emits anchor)
+        run: |
+          out="$(bash hooks/time-anchor.sh text)"
+          echo "$out" | grep -q "temporal anchor" || exit 1
+          echo "$out" | grep -q "local_time:" || exit 1
+
+      - name: Smoke test — no-curfew ("get some sleep" → BLOCK)
+        run: |
+          printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"Repo is live. Get some sleep — the launch matters more than the polish."}' > /tmp/t.json
+          out="$(bash hooks/no-curfew.sh < /tmp/t.json 2>&1; echo "EXIT=$?")"
+          echo "$out" | grep -q "BLOCKED: unsolicited rest/wellness paternalism" || exit 1
+          echo "$out" | grep -q "EXIT=2" || exit 1
+
+      - name: Smoke test — no-sycophancy ("Great question!" opener → BLOCK)
+        run: |
+          printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"Great question! The answer is 42."}' > /tmp/t.json
+          out="$(bash hooks/no-sycophancy.sh < /tmp/t.json 2>&1; echo "EXIT=$?")"
+          echo "$out" | grep -q "BLOCKED: praise-spam" || exit 1
+          echo "$out" | grep -q "EXIT=2" || exit 1
+
+      - name: Smoke test — no-cliffhanger ("Want me to continue?" → BLOCK)
+        run: |
+          printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"Want me to continue with the second migration?"}' > /tmp/t.json
+          out="$(bash hooks/no-cliffhanger.sh < /tmp/t.json 2>&1; echo "EXIT=$?")"
+          echo "$out" | grep -q "BLOCKED: dangling permission-loop" || exit 1
+          echo "$out" | grep -q "EXIT=2" || exit 1
+
+      - name: Smoke test — honest-eta ("3 hours" no structure → BLOCK)
+        run: |
+          printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"This will take about 3 hours to implement."}' > /tmp/t.json
+          out="$(bash hooks/honest-eta.sh < /tmp/t.json 2>&1; echo "EXIT=$?")"
+          echo "$out" | grep -q "BLOCKED: time estimate" || exit 1
+          echo "$out" | grep -q "EXIT=2" || exit 1
+
+      - name: Smoke test — no-fake-recall ("as we discussed" no quote → BLOCK)
+        run: |
+          printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"As we discussed earlier, the answer is to use a hash map."}' > /tmp/t.json
+          out="$(bash hooks/no-fake-recall.sh < /tmp/t.json 2>&1; echo "EXIT=$?")"
+          echo "$out" | grep -q "BLOCKED: false-memory recall" || exit 1
+          echo "$out" | grep -q "EXIT=2" || exit 1
+
+      - name: Smoke test — no-fake-stats ("73.4%" no source → BLOCK)
+        run: |
+          printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"Approximately 73.4% of users report this issue."}' > /tmp/t.json
+          out="$(bash hooks/no-fake-stats.sh < /tmp/t.json 2>&1; echo "EXIT=$?")"
+          echo "$out" | grep -q "BLOCKED: fabricated-looking statistic" || exit 1
+          echo "$out" | grep -q "EXIT=2" || exit 1
+
+      - name: Smoke test — no-fake-cite ("Smith et al., 2023" no URL → BLOCK)
+        run: |
+          printf '%s' '{"hook_event_name":"Stop","last_assistant_message":"This is documented in Smith et al., 2023 and is widely accepted."}' > /tmp/t.json
+          out="$(bash hooks/no-fake-cite.sh < /tmp/t.json 2>&1; echo "EXIT=$?")"
+          echo "$out" | grep -q "BLOCKED: citation-formatted reference" || exit 1
+          echo "$out" | grep -q "EXIT=2" || exit 1
+
+      - name: Smoke test — no-amnesia (state engine round-trip)
+        run: |
+          mkdir -p /tmp/work && cd /tmp/work
+          git init -q && git config user.email t@t && git config user.name t && touch foo.txt
+          # status with no state should print the help message and exit 0
+          out="$(bash $GITHUB_WORKSPACE/hooks/state.sh status; echo "EXIT=$?")"
+          echo "$out" | grep -q "No working state found" || exit 1
+          echo "$out" | grep -q "EXIT=0" || exit 1
+          # snapshot creates CURRENT.md
+          echo '{}' | bash $GITHUB_WORKSPACE/hooks/state.sh snapshot
+          test -f .no-amnesia/state/CURRENT.md || exit 1
+          # hydrate now returns Claude-Code-shaped JSON
+          bash $GITHUB_WORKSPACE/hooks/state.sh hydrate | python3 -c "
+          import json, sys
+          d = json.loads(sys.stdin.read())
+          assert d['hookSpecificOutput']['hookEventName'] == 'SessionStart'
+          assert 'additionalContext' in d['hookSpecificOutput']
+          print('OK')
+          "
+
+      - name: Summary
+        run: echo "All 10 hooks in the bundle pass smoke tests against canonical fixtures."
