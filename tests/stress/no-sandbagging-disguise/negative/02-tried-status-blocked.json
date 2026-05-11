@@ -1,0 +1,1 @@
+{"hook_event_name": "Stop", "last_assistant_message": "I attempted the migration but failed. Status: blocked. The blocker is missing DATABASE_URL env var."}

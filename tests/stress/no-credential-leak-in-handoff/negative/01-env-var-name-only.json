@@ -1,0 +1,1 @@
+{"hook_event_name": "TaskCreated", "task": {"description": "Use the value of $ANTHROPIC_API_KEY from env."}}

@@ -1,8 +1,9 @@
 {
   "_comment": [
-    "LLM Dark Patterns Hooks — bundled plugin wiring for all 16 hooks.",
-    "Stop / SubagentStop fan out to 13 closeout-language hooks plus the state-stop continuity refresh.",
-    "TaskCreated wires no-handoff-loop. TaskCompleted wires no-ownership-violation.",
+    "LLM Dark Patterns Hooks — bundled plugin wiring for all 21 hooks.",
+    "Stop / SubagentStop fan out to 17 closeout-language hooks plus the state-stop continuity refresh.",
+    "TaskCreated wires no-handoff-loop + no-credential-leak. TaskCompleted wires no-ownership-violation.",
+    "PreToolUse / PostToolUse wire no-vibes side checks plus no-approval-sneak.",
     "PreCompact / PostCompact / SessionStart wire the no-amnesia continuity branch.",
     "PreToolUse / PostToolUse / TaskCreated / TaskCompleted wire the no-vibes side checks.",
     "Each hook is independent — disable one by removing its entry."
@@ -23,6 +24,10 @@
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-aggregator-hallucination.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-silent-worker-success.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-cherry-pick-rollup.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-credential-leak-in-handoff.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-phantom-tool-call.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-sandbagging-disguise.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-rollback-claim-without-evidence.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/state-stop.sh\"", "timeout": 10 }
         ]
       }
@@ -41,7 +46,11 @@
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-wrap-up.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-aggregator-hallucination.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-silent-worker-success.sh\"", "timeout": 5 },
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-cherry-pick-rollup.sh\"", "timeout": 5 }
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-cherry-pick-rollup.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-credential-leak-in-handoff.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-phantom-tool-call.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-sandbagging-disguise.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-rollback-claim-without-evidence.sh\"", "timeout": 5 }
         ]
       }
     ],
@@ -55,7 +64,8 @@
       {
         "matcher": "Edit|Write|MultiEdit|NotebookEdit",
         "hooks": [
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-vibes.sh\"", "timeout": 5 }
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-vibes.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-approval-sneak.sh\"", "timeout": 5 }
         ]
       }
     ],
@@ -71,7 +81,8 @@
       {
         "hooks": [
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-vibes.sh\"", "timeout": 5 },
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-handoff-loop.sh\"", "timeout": 5 }
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-handoff-loop.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-credential-leak-in-handoff.sh\"", "timeout": 5 }
         ]
       }
     ],
