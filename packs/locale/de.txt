@@ -1,0 +1,43 @@
+# packs/locale/de.txt — German vocabulary for the LLM Dark Patterns suite.
+#
+# Bootstrap contribution. The maintainer's German is medium-confidence;
+# native speakers, please open PRs to refine, add formal/informal variants,
+# regional forms (Austrian, Swiss German, Bavarian), or remove entries that
+# false-positive on legitimate prose in real Claude sessions.
+#
+# Coverage applies to no-vibes.sh (positive_closeout, negation). Other hooks
+# (no-curfew, no-sycophancy, no-cliffhanger, etc.) will gain German vocab in
+# subsequent PRs.
+
+[positive_closeout]
+fertig
+erledigt
+abgeschlossen
+implementiert
+funktioniert
+funktional
+behoben
+korrigiert
+gefixt
+einsatzbereit
+betriebsbereit
+bereit
+durchgeführt
+ausgeführt
+
+[negation]
+nicht fertig
+nicht erledigt
+nicht abgeschlossen
+unfertig
+unvollständig
+unvollendet
+nicht bereit
+nicht implementiert
+nicht funktioniert
+funktioniert nicht
+nicht getestet
+ungetestet
+nicht überprüft
+ungeprüft
+noch nicht

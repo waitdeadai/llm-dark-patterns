@@ -183,6 +183,21 @@ NO_VIBES_LOCALE_POSITIVE = {
     ),
 }
 
+NO_VIBES_LOCALE_POSITIVE.update({
+    "35-german-fertig-funktioniert": (
+        "Die Funktion ist fertig und funktioniert wie erwartet.",
+        {"LLM_DARK_PATTERNS_LOCALE": "en,de"},
+    ),
+    "36-french-termine-fonctionne": (
+        "La fonctionnalité est terminée et fonctionne correctement.",
+        {"LLM_DARK_PATTERNS_LOCALE": "en,fr"},
+    ),
+    "37-portuguese-pronto-funciona": (
+        "A funcionalidade está pronta e funciona.",
+        {"LLM_DARK_PATTERNS_LOCALE": "en,pt"},
+    ),
+})
+
 NO_VIBES_LOCALE_NEGATIVE = {
     "15-spanish-todavia-no-listo": (
         "Todavía no terminado — falta cablear la segunda integración.",

@@ -1,0 +1,63 @@
+# packs/locale/pt.txt — Portuguese vocabulary for the LLM Dark Patterns suite.
+#
+# Bootstrap contribution. The maintainer's Portuguese is medium-confidence;
+# native speakers, please open PRs to refine, add Brazilian vs European
+# variants, gender forms, or remove entries that false-positive on
+# legitimate prose in real Claude sessions.
+#
+# Coverage applies to no-vibes.sh (positive_closeout, negation). Other hooks
+# (no-curfew, no-sycophancy, no-cliffhanger, etc.) will gain Portuguese vocab
+# in subsequent PRs.
+
+[positive_closeout]
+pronto
+pronta
+feito
+feita
+terminado
+terminada
+concluído
+concluída
+completo
+completa
+completado
+completada
+implementado
+implementada
+funciona
+funcional
+corrigido
+corrigida
+consertado
+consertada
+finalizado
+finalizada
+acabado
+acabada
+operacional
+executado
+executada
+
+[negation]
+não pronto
+não pronta
+não terminado
+não terminada
+não concluído
+não concluída
+não completo
+não completa
+incompleto
+incompleta
+inacabado
+inacabada
+não implementado
+não implementada
+não funciona
+não testado
+não testada
+sem teste
+não verificado
+não verificada
+sem verificar
+ainda não

@@ -1,0 +1,63 @@
+# packs/locale/fr.txt — French vocabulary for the LLM Dark Patterns suite.
+#
+# Bootstrap contribution. The maintainer's French is medium-confidence;
+# native speakers, please open PRs to refine, add formal/informal forms,
+# regional variants (Quebec, Belgian, Swiss), gender forms, or remove
+# entries that false-positive on legitimate prose in real Claude sessions.
+#
+# Coverage applies to no-vibes.sh (positive_closeout, negation). Other hooks
+# (no-curfew, no-sycophancy, no-cliffhanger, etc.) will gain French vocab in
+# subsequent PRs.
+
+[positive_closeout]
+terminé
+terminée
+fini
+finie
+complété
+complétée
+complet
+complète
+implémenté
+implémentée
+fonctionne
+fonctionnel
+fonctionnelle
+corrigé
+corrigée
+réparé
+réparée
+prêt
+prête
+fait
+faite
+achevé
+achevée
+exécuté
+exécutée
+
+[negation]
+pas terminé
+pas terminée
+pas fini
+pas finie
+non terminé
+non terminée
+incomplet
+incomplète
+inachevé
+inachevée
+pas prêt
+pas prête
+pas fait
+pas implémenté
+pas implémentée
+ne fonctionne pas
+non testé
+non testée
+pas testé
+pas testée
+non vérifié
+non vérifiée
+pas vérifié
+pas encore
