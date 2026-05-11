@@ -138,6 +138,9 @@ jobs:
           python3 --version
           bash --version | head -1
 
+      - name: Pack loader unit tests
+        run: bash tests/test-pack-loader.sh
+
       - name: Run stress suite
         run: bash tests/stress/run.sh
 

@@ -1,0 +1,40 @@
+# packs/locale/en.txt — English vocabulary for the LLM Dark Patterns suite.
+#
+# Format: one entry per line, blank lines and `#`-comments ignored. Each
+# `[section]` groups entries for a specific hook check.
+#
+# When adding new entries, prefer the lowercased base form. The hooks load
+# entries case-insensitively and wrap them in word-boundary patterns, so
+# "done" matches "Done", "DONE", or "done." but not "redone" or "doneness".
+#
+# Maintained by community contributors. Extensions welcome via PR.
+
+# Positive-closeout verbs that signal the model is claiming the work is
+# finished. Used by no-vibes.sh to detect closeout claims and pair them
+# with the evidence check.
+[positive_closeout]
+all set
+done
+completed
+complete
+implemented
+fixed
+finished
+ready
+passes
+passed
+shipped
+
+# Negation phrases that, when in the same clause as a positive-closeout
+# verb, indicate the model is genuinely flagging the work as not done.
+# A negation outside the clause containing the verb does NOT silence the
+# verb (closes the bypass tracked in issue #5).
+[negation]
+not done
+not complete
+not completed
+not ready
+incomplete
+unfinished
+never ran
+did not (run|execute|test|verify)

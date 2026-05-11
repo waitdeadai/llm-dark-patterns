@@ -1,8 +1,38 @@
 #!/bin/bash
 # Claude Code hook: block destructive Bash and low-evidence positive closeout.
 # Extra hook events fail open unless the payload is clearly dangerous.
+#
+# Vocabulary is loaded from packs/locale/<lang>.txt (Phase 1 of the loadable
+# packs roadmap, see ROADMAP.md). The hook still works without packs — each
+# load falls back to an inline English default that matches the pre-pack
+# behavior verbatim, so no fixture regresses.
 
 set -euo pipefail
+
+# Load the shared pack helper. The plugin format puts hooks/ and lib/ as
+# siblings under ${CLAUDE_PLUGIN_ROOT}; resolve relative to this script.
+_HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$_HOOK_DIR/../lib/packs.sh" ]; then
+  # shellcheck source=../lib/packs.sh
+  source "$_HOOK_DIR/../lib/packs.sh"
+fi
+
+# Resolve vocab from active locale packs, or fall back to the inline English
+# defaults if the loader is unavailable or the pack section is empty.
+_load_with_fallback() {
+  local section="$1" fallback="$2" loaded=""
+  if declare -F load_locale_section >/dev/null 2>&1; then
+    loaded="$(load_locale_section "$section" 2>/dev/null)"
+  fi
+  if [ -z "$loaded" ]; then
+    printf '%s' "$fallback"
+  else
+    printf '%s' "$loaded"
+  fi
+}
+
+POSITIVE_VERBS_RE="$(_load_with_fallback positive_closeout 'all set|done|completed|complete|implemented|fixed|finished|ready|passes|passed|shipped')"
+NEGATIONS_RE="$(_load_with_fallback negation 'not done|not complete|not completed|not ready|incomplete|unfinished|never ran|did not (run|execute|test|verify)')"
 
 INPUT="$(cat)"
 
@@ -203,10 +233,11 @@ has_positive_closeout() {
   # the same clause. Splits on sentence delimiters (.!?) and conjunctions
   # (but/however/though/except/although) so a hedge in one clause does not
   # silence a positive claim in the next. Closes issue #5 (negation
-  # early-return bypass).
+  # early-return bypass). Vocabulary loaded from packs/locale/* with inline
+  # English fallback (Phase 1).
   local message="$1"
-  local POSITIVE='(^|[^[:alpha:]])(all set|done|completed|complete|implemented|fixed|finished|ready|passes|passed|shipped)([^[:alpha:]]|$)'
-  local NEGATIONS='(^|[^[:alpha:]])(not done|not complete|not completed|not ready|incomplete|unfinished|never ran|did not (run|execute|test|verify))([^[:alpha:]]|$)'
+  local POSITIVE="(^|[^[:alpha:]])(${POSITIVE_VERBS_RE})([^[:alpha:]]|$)"
+  local NEGATIONS="(^|[^[:alpha:]])(${NEGATIONS_RE})([^[:alpha:]]|$)"
 
   local clauses
   clauses="$(printf '%s' "$message" \
