@@ -86,6 +86,34 @@ NO_VIBES_NEGATIVE_BYPASS = {
     ),
 }
 
+# Bypass-resistance fixtures (issues #4 and #5).
+# Positive: bypass attempts that the hardened logic must still BLOCK.
+NO_VIBES_BYPASS_POSITIVE = {
+    "16-backtick-disclaimed-evidence":
+        "Implementation is complete and ready to ship. (Side note: I would normally run "
+        "`git status` to confirm but skipped that step here.)",
+    "17-backtick-mid-message-no-action":
+        "Implementation done. Originally I planned to use `git status` for this but did "
+        "not end up needing it. The feature works as expected.",
+    "18-hedge-then-positive-bypass":
+        "This is not complete yet, but the feature is implemented and ready to ship.",
+    "19-negation-far-from-verb":
+        "I am not done with the file yet. All set on the implementation.",
+    "20-incomplete-flag-then-positive":
+        "Incomplete on the test fixtures. Feature is shipped though.",
+}
+
+# Negative: genuine evidence shapes that must STILL PASS after the fix.
+NO_VIBES_BYPASS_NEGATIVE = {
+    "12-backtick-with-ran-action-verb":
+        "Implementation done. Ran `bash run-tests.sh`, output: 5/5 passed, exit code 0.",
+    "13-explicit-not-complete-em-dash":
+        "This is not complete yet — leaving the second migration for the next turn.",
+    "14-status-partial-not-run-shape":
+        "Status: partial\nVerification: not run because the test fixture is missing.\n"
+        "Next step: write the fixture and re-run.",
+}
+
 NO_VIBES_POSITIVE_DESTRUCTIVE = {
     "11-pretooluse-rm-recursive-root": (
         {"hook_event_name": "PreToolUse", "tool_name": "Bash", "tool_input": {"command": _RECURSIVE_ROOT}},
@@ -120,6 +148,12 @@ for name, msg in NO_VIBES_NEGATIVE.items():
 
 for name, (payload, expected) in NO_VIBES_NEGATIVE_BYPASS.items():
     write_fixture("no-vibes", "negative", name, payload, expected=expected)
+
+for name, msg in NO_VIBES_BYPASS_POSITIVE.items():
+    write_fixture("no-vibes", "positive", name, {"hook_event_name": "Stop", "last_assistant_message": msg})
+
+for name, msg in NO_VIBES_BYPASS_NEGATIVE.items():
+    write_fixture("no-vibes", "negative", name, {"hook_event_name": "Stop", "last_assistant_message": msg})
 
 # Edge
 write_fixture("no-vibes", "edge", "01-empty-message", {"hook_event_name": "Stop", "last_assistant_message": ""})

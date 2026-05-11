@@ -199,11 +199,30 @@ block_sensitive_write_paths() {
 }
 
 has_positive_closeout() {
+  # Detects positive-closeout verbs UNLESS each occurrence is negated within
+  # the same clause. Splits on sentence delimiters (.!?) and conjunctions
+  # (but/however/though/except/although) so a hedge in one clause does not
+  # silence a positive claim in the next. Closes issue #5 (negation
+  # early-return bypass).
   local message="$1"
-  if printf '%s\n' "$message" | grep -Eiq '(^|[^[:alpha:]])(not done|not complete|not completed|not ready|incomplete|unfinished)([^[:alpha:]]|$)'; then
-    return 1
-  fi
-  printf '%s\n' "$message" | grep -Eiq '(^|[^[:alpha:]])(all set|done|completed|complete|implemented|fixed|finished|ready|passes|passed|shipped)([^[:alpha:]]|$)'
+  local POSITIVE='(^|[^[:alpha:]])(all set|done|completed|complete|implemented|fixed|finished|ready|passes|passed|shipped)([^[:alpha:]]|$)'
+  local NEGATIONS='(^|[^[:alpha:]])(not done|not complete|not completed|not ready|incomplete|unfinished|never ran|did not (run|execute|test|verify))([^[:alpha:]]|$)'
+
+  local clauses
+  clauses="$(printf '%s' "$message" \
+    | sed -E 's/[.!?]+/\n/g' \
+    | sed -E 's/(,|;)?[[:space:]]+(but|however|though|except|although)[[:space:]]+/\n/gI')"
+
+  while IFS= read -r clause; do
+    [ -z "$clause" ] && continue
+    if printf '%s' "$clause" | grep -Eiq "$POSITIVE"; then
+      if ! printf '%s' "$clause" | grep -Eiq "$NEGATIONS"; then
+        return 0
+      fi
+    fi
+  done <<< "$clauses"
+
+  return 1
 }
 
 has_missing_verification() {
@@ -213,9 +232,27 @@ has_missing_verification() {
 }
 
 has_command_evidence() {
+  # Evidence requires either:
+  #   (a) explicit "Commands run:" header followed by a backtick command, OR
+  #   (b) a backtick command in the closing window (last 240 chars of the
+  #       message) preceded within ~80 chars by an action verb that asserts
+  #       the command was actually executed (ran/executed/output/returned/
+  #       passed/result of/exit code/stderr/stdout).
+  # Closes issue #4 (backtick-anywhere-counts-as-evidence bypass). A backtick
+  # buried mid-message inside a parenthetical disclaiming execution no
+  # longer counts as evidence.
   local message="$1"
-  printf '%s\n' "$message" | grep -Eiq '(^|[[:space:]])commands?[[:space:]]+run:' && return 0
-  printf '%s\n' "$message" | grep -Eiq '`(bash|git|npm|pnpm|yarn|pytest|python3?|ruff|cargo|go test|make)[^`]*`' && return 0
+
+  if printf '%s\n' "$message" | grep -Eiq '(^|[[:space:]])commands?[[:space:]]+run:[^[:cntrl:]]{0,40}`(bash|git|npm|pnpm|yarn|pytest|python3?|ruff|cargo|go test|make)[^`]*`'; then
+    return 0
+  fi
+
+  local closing
+  closing="$(printf '%s' "$message" | tail -c 240)"
+  if printf '%s\n' "$closing" | grep -Eiq '(\bran\b|\bexecuted\b|\brunning\b|\boutput\b|\bresult of\b|\bpassed\b|\bexit code\b|\bstderr\b|\bstdout\b|\breturned\b)[^`]{0,80}`(bash|git|npm|pnpm|yarn|pytest|python3?|ruff|cargo|go test|make)[^`]*`'; then
+    return 0
+  fi
+
   return 1
 }
 
