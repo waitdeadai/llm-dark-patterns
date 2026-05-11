@@ -1,0 +1,1 @@
+{"hook_event_name": "TaskCompleted", "task": {"scope": "src/api/"}, "tool_response": {"edited_files": ["src/web/index.html"]}}

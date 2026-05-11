@@ -1,0 +1,1 @@
+{"hook_event_name": "Stop", "last_assistant_message": "4 out of 5 workers succeeded. The failed worker W5 will be retried with adjusted timeout. Status: partial. Next step: investigate worker W5 failure."}

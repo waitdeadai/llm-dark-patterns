@@ -1,0 +1,1 @@
+{"hook_event_name": "TaskCreated", "task": {"delegation_chain": ["planner", "executor", "planner", "executor", "planner"]}}

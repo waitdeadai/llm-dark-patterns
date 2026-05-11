@@ -1,0 +1,1 @@
+{"hook_event_name": "TaskCompleted", "task": {"owned_paths": "src/auth/"}, "tool_response": {"file_path": "src/auth/login.ts"}}
