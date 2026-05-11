@@ -1,0 +1,69 @@
+# packs/locale/es.txt — Spanish vocabulary for the LLM Dark Patterns suite.
+#
+# Initial contribution covering the most common Spanish (Latin American +
+# Spain variants) coding-completion vocabulary. Native speakers: PRs welcome
+# to refine, add regional variants (Argentinian voseo, Mexican, Iberian,
+# Andino, Caribbean), or remove false positives encountered in real sessions.
+#
+# Coverage applies to no-vibes.sh (positive_closeout, negation). Other hooks
+# (no-curfew, no-sycophancy, no-cliffhanger, etc.) will gain Spanish vocab in
+# subsequent PRs.
+
+[positive_closeout]
+listo
+terminado
+terminada
+completo
+completa
+completado
+completada
+implementado
+implementada
+finalizado
+finalizada
+acabado
+acabada
+hecho
+hecha
+arreglado
+arreglada
+corregido
+corregida
+funciona
+funcional
+operativo
+operativa
+ejecutado
+ejecutada
+concluido
+concluida
+
+[negation]
+sin terminar
+no terminado
+no terminada
+no completo
+no completa
+no completado
+no completada
+incompleto
+incompleta
+inacabado
+inacabada
+inconcluso
+inconclusa
+sin acabar
+no listo
+no lista
+no funciona
+no implementado
+no implementada
+no se ejecutó
+no se probó
+no probado
+no probada
+no verificado
+no verificada
+sin verificar
+todavía no
+aún no

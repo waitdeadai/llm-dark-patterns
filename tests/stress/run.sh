@@ -133,6 +133,19 @@ run_one() {
 
   TOTAL=$((TOTAL + 1))
 
+  # Per-fixture env sidecar — `<fixture>.env` is sourced before the hook runs.
+  # Allows fixtures to require specific locales (e.g.
+  # LLM_DARK_PATTERNS_LOCALE=en,es,pl) without polluting the rest of the run.
+  local env_sidecar="${fixture%.json}.env"
+  local env_snapshot=""
+  if [ -f "$env_sidecar" ]; then
+    env_snapshot="$(env)"
+    set -a
+    # shellcheck disable=SC1090
+    source "$env_sidecar"
+    set +a
+  fi
+
   case "$hook_basename" in
     time-anchor)
       stderr_out="$(run_time_anchor "$fixture")"; actual=$?
@@ -145,6 +158,18 @@ run_one() {
       stderr_out="$(run_stop_hook "$hook" "$fixture")"; actual=$?
       ;;
   esac
+
+  # Restore environment after each fixture to keep them independent.
+  if [ -n "$env_snapshot" ]; then
+    while IFS='=' read -r k _; do
+      [ -z "$k" ] && continue
+      # Only unset locale-related override vars that the sidecar might set;
+      # avoid wiping inherited env that other fixtures depend on.
+      case "$k" in
+        LLM_DARK_PATTERNS_*|LANG|LC_*) unset "$k" ;;
+      esac
+    done < <(diff <(printf '%s\n' "$env_snapshot") <(env) | grep '^>' | sed 's/^> //')
+  fi
 
   local fixture_rel="${fixture#${ROOT_DIR}/}"
   if [ "$actual" = "$expected" ]; then

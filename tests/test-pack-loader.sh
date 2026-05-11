@@ -113,27 +113,39 @@ assert_eq \
   "pl,es," \
   "LLM_DARK_PATTERNS_LOCALE comma-separated, in order"
 
-# LANG fallback when env unset
+# LANG fallback when env unset: en + detected, in that order
 assert_eq \
-  "$(unset LLM_DARK_PATTERNS_LOCALE; LANG=de_DE.UTF-8 active_locales)" \
-  "de" \
-  "LANG fallback uses first 2 chars"
+  "$(unset LLM_DARK_PATTERNS_LOCALE; LANG=de_DE.UTF-8 active_locales | tr '\n' ',')" \
+  "en,de," \
+  "LANG fallback adds detected locale on top of base en"
 
-# C/POSIX falls back to en
+# LANG=en* should not duplicate "en"
+assert_eq \
+  "$(unset LLM_DARK_PATTERNS_LOCALE; LANG=en_US.UTF-8 active_locales | tr '\n' ',')" \
+  "en," \
+  "LANG=en* does not duplicate en"
+
+# C/POSIX falls back to en only
 assert_eq \
   "$(unset LLM_DARK_PATTERNS_LOCALE; LANG=C active_locales)" \
   "en" \
-  "C locale falls back to en"
+  "C locale falls back to en only"
 
 assert_eq \
   "$(unset LLM_DARK_PATTERNS_LOCALE; LANG=POSIX active_locales)" \
   "en" \
-  "POSIX locale falls back to en"
+  "POSIX locale falls back to en only"
 
 assert_eq \
   "$(unset LLM_DARK_PATTERNS_LOCALE LANG; active_locales)" \
   "en" \
-  "no env at all falls back to en"
+  "no env at all falls back to en only"
+
+# Explicit env wins entirely (no implicit en added)
+assert_eq \
+  "$(LLM_DARK_PATTERNS_LOCALE='pl' active_locales | tr '\n' ',')" \
+  "pl," \
+  "explicit env override does not add implicit en"
 
 echo ""
 echo "=== resolve_pack_paths ==="

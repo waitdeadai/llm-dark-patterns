@@ -31,13 +31,25 @@
 # file at the XDG location without forking.
 
 # Echo active locale codes, one per line, in priority order.
+#
+# Behavior:
+#   - If LLM_DARK_PATTERNS_LOCALE is set, it is the exact operator choice
+#     (no implicit additions). Comma-separated values become one per line.
+#   - Otherwise, English is always loaded as a base, plus the LANG-detected
+#     locale if non-trivial. This matches real Claude usage where code keywords
+#     stay English while prose is in the operator's language.
+#   - C / POSIX / unset LANG → just "en".
 active_locales() {
   if [ -n "${LLM_DARK_PATTERNS_LOCALE:-}" ]; then
     printf '%s\n' "$LLM_DARK_PATTERNS_LOCALE" | tr ',' '\n' | grep -v '^[[:space:]]*$'
-  elif [ -n "${LANG:-}" ] && [ "${LANG:0:1}" != "C" ] && [ "${LANG:0:1}" != "P" ]; then
-    printf '%s\n' "${LANG:0:2}"
-  else
-    echo "en"
+    return
+  fi
+  echo "en"
+  if [ -n "${LANG:-}" ] && [ "${LANG:0:1}" != "C" ] && [ "${LANG:0:1}" != "P" ]; then
+    local detected="${LANG:0:2}"
+    if [ "$detected" != "en" ]; then
+      printf '%s\n' "$detected"
+    fi
   fi
 }
 

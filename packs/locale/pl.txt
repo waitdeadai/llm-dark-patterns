@@ -1,0 +1,70 @@
+# packs/locale/pl.txt — Polish vocabulary for the LLM Dark Patterns suite.
+#
+# Bootstrap terms confirmed by @Tekalan in
+# https://github.com/anthropics/claude-code/issues/57661#issuecomment-4418038561
+# plus high-confidence forms from standard Polish IT vocabulary. Native
+# speakers: PRs welcome to refine, add formal/informal variants, perfective
+# vs imperfective forms, or remove false positives.
+#
+# Coverage applies to no-vibes.sh (positive_closeout, negation). Other hooks
+# (no-curfew, no-sycophancy, no-cliffhanger, etc.) will gain Polish vocab in
+# subsequent PRs.
+
+[positive_closeout]
+gotowe
+gotów
+gotowa
+gotowy
+działa
+działają
+naprawione
+naprawiony
+naprawiona
+skończone
+skończony
+skończona
+zakończone
+zakończony
+zakończona
+ukończone
+ukończony
+ukończona
+zaimplementowane
+zaimplementowany
+zaimplementowana
+zrobione
+zrobiony
+zrobiona
+wdrożone
+wdrożony
+wdrożona
+
+[negation]
+niegotowe
+niegotowy
+niegotowa
+nieskończone
+nieskończony
+nieskończona
+nieukończone
+nieukończony
+nieukończona
+niezakończone
+niezakończony
+niezakończona
+nie zrobione
+nie zrobiony
+nie zrobiona
+nie działa
+nie naprawione
+nie naprawiony
+nie naprawiona
+nie ukończone
+nie zaimplementowane
+jeszcze nie
+nie testowane
+nieprzetestowane
+niesprawdzone
+nie sprawdzone
+nie zweryfikowane
+niezweryfikowane

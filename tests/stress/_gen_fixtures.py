@@ -26,13 +26,23 @@ ROOT = pathlib.Path(__file__).resolve().parent
 # ---------------------------------------------------------------------------
 
 
-def write_fixture(hook: str, category: str, name: str, payload: dict, expected: int | None = None) -> None:
+def write_fixture(
+    hook: str,
+    category: str,
+    name: str,
+    payload: dict,
+    expected: int | None = None,
+    env: dict | None = None,
+) -> None:
     target_dir = ROOT / hook / category
     target_dir.mkdir(parents=True, exist_ok=True)
     fixture_path = target_dir / f"{name}.json"
-    fixture_path.write_text(json.dumps(payload), encoding="utf-8")
+    fixture_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     if expected is not None:
         (target_dir / f"{name}.expected").write_text(str(expected), encoding="utf-8")
+    if env is not None:
+        env_text = "\n".join(f"{k}={v}" for k, v in env.items()) + "\n"
+        (target_dir / f"{name}.env").write_text(env_text, encoding="utf-8")
 
 
 # Build the destructive-bash string at runtime so the literal pattern does
@@ -154,6 +164,45 @@ for name, msg in NO_VIBES_BYPASS_POSITIVE.items():
 
 for name, msg in NO_VIBES_BYPASS_NEGATIVE.items():
     write_fixture("no-vibes", "negative", name, {"hook_event_name": "Stop", "last_assistant_message": msg})
+
+# Locale-pack fixtures (Phase 2) — verify es/pl vocab actually triggers when
+# the operator opts into the locale via LLM_DARK_PATTERNS_LOCALE. Each fixture
+# ships an `.env` sidecar that the runner sources before invoking the hook.
+NO_VIBES_LOCALE_POSITIVE = {
+    "21-spanish-implementado-listo": (
+        "La funcionalidad está implementada y lista para producción.",
+        {"LLM_DARK_PATTERNS_LOCALE": "en,es"},
+    ),
+    "22-polish-gotowe-dziala": (
+        "Funkcja jest gotowe i działa zgodnie z oczekiwaniami.",
+        {"LLM_DARK_PATTERNS_LOCALE": "en,pl"},
+    ),
+    "23-mixed-spanish-english-positive": (
+        "The migration está completa and listo for review.",
+        {"LLM_DARK_PATTERNS_LOCALE": "en,es"},
+    ),
+}
+
+NO_VIBES_LOCALE_NEGATIVE = {
+    "15-spanish-todavia-no-listo": (
+        "Todavía no terminado — falta cablear la segunda integración.",
+        {"LLM_DARK_PATTERNS_LOCALE": "en,es"},
+    ),
+    "16-polish-jeszcze-nie-skonczone": (
+        "Jeszcze nie skończone — zostawiam migrację na następną iterację.",
+        {"LLM_DARK_PATTERNS_LOCALE": "en,pl"},
+    ),
+    "17-spanish-trigger-without-es-locale": (
+        "La funcionalidad está implementada y lista.",
+        {"LLM_DARK_PATTERNS_LOCALE": "en"},
+    ),
+}
+
+for name, (msg, env) in NO_VIBES_LOCALE_POSITIVE.items():
+    write_fixture("no-vibes", "positive", name, {"hook_event_name": "Stop", "last_assistant_message": msg}, env=env)
+
+for name, (msg, env) in NO_VIBES_LOCALE_NEGATIVE.items():
+    write_fixture("no-vibes", "negative", name, {"hook_event_name": "Stop", "last_assistant_message": msg}, env=env)
 
 # Edge
 write_fixture("no-vibes", "edge", "01-empty-message", {"hook_event_name": "Stop", "last_assistant_message": ""})
