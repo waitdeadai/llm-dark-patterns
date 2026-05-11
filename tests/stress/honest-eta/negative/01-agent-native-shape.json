@@ -1,0 +1,1 @@
+{"hook_event_name": "Stop", "last_assistant_message": "Agent-Native Estimate:\n- estimate type: agent-native\n- agent_wall_clock: optimistic 30m / likely 2h / pessimistic 6h\n- critical_path: research -> spec -> impl -> verify\n- confidence: medium\n"}

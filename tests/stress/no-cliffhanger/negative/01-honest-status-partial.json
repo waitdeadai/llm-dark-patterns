@@ -1,0 +1,1 @@
+{"hook_event_name": "Stop", "last_assistant_message": "Status: partial\nVerification: not run because the test fixture is missing.\nNext step: write the fixture and re-run."}

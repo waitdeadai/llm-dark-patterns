@@ -60,7 +60,13 @@ if printf '%s' "$opening" | grep -Eiq '(you (asked|wanted) (me )?(to (praise|com
 fi
 
 # Trigger: praise-spam vocabulary at message open.
-SYCOPHANCY='^[[:space:]]*[*_>"#-]*[[:space:]]*(Great question[!.]|Excellent question[!.]|Brilliant question[!.]|Perfect question[!.]|Amazing question[!.]|Fantastic question[!.]|Wonderful question[!.]|That'\''s a (great|excellent|perfect|brilliant|wonderful|fantastic|amazing|fascinating|really good|very good|terrific) question|You'\''re absolutely right[!.,]|You'\''re (so |totally |completely )?correct[!.,]|Absolutely[!.,]|Of course[!.,]|Excellent (point|observation|catch)[!.,]|Great (point|catch|observation|insight|thinking)[!.,]|Perfect[!.,]|Brilliant[!.,]|Wonderful[!.,]|Amazing[!.,]|Fantastic[!.,]|What an (excellent|amazing|insightful|thoughtful) question|Glad you asked|Happy to help with that)'
+# Match the praise opener followed by sentence-ending punctuation OR a
+# dash/em-dash/en-dash (which Claude often uses to chain into the answer).
+# Use alternation `(!|\.|,|—|–|-)` instead of a bracket class because grep -E
+# does not treat multibyte UTF-8 chars (em-dash, en-dash) as single chars
+# inside `[...]`.
+PRAISE_TAIL='([[:space:]]*(!|\.|,|—|–|-))'
+SYCOPHANCY='^[[:space:]]*[*_>"#-]*[[:space:]]*(Great question'"$PRAISE_TAIL"'|Excellent question'"$PRAISE_TAIL"'|Brilliant question'"$PRAISE_TAIL"'|Perfect question'"$PRAISE_TAIL"'|Amazing question'"$PRAISE_TAIL"'|Fantastic question'"$PRAISE_TAIL"'|Wonderful question'"$PRAISE_TAIL"'|That'\''s a (great|excellent|perfect|brilliant|wonderful|fantastic|amazing|fascinating|really good|very good|terrific) question|You'\''re absolutely right[!.,]|You'\''re (so |totally |completely )?correct[!.,]|Absolutely[!.,]|Of course[!.,]|Excellent (point|observation|catch)[!.,]|Great (point|catch|observation|insight|thinking)[!.,]|Perfect[!.,]|Brilliant[!.,]|Wonderful[!.,]|Amazing[!.,]|Fantastic[!.,]|What an (excellent|amazing|insightful|thoughtful) question|Glad you asked|Happy to help with that)'
 
 if printf '%s' "$opening" | grep -Eiq "$SYCOPHANCY"; then
   block "praise-spam at turn open." \

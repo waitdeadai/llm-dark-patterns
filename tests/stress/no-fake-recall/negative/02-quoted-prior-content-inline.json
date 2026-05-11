@@ -1,0 +1,1 @@
+{"hook_event_name": "Stop", "last_assistant_message": "You mentioned earlier \"the throughput requirement is at least 200 RPS sustained over a five-minute window\" \u2014 so the queue depth check is fine."}

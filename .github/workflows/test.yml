@@ -125,3 +125,26 @@ jobs:
 
       - name: Summary
         run: echo "All 10 hooks in the bundle pass smoke tests against canonical fixtures."
+
+  stress:
+    name: Stress test (168 fixtures)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify dependencies
+        run: |
+          jq --version
+          python3 --version
+          bash --version | head -1
+
+      - name: Run stress suite
+        run: bash tests/stress/run.sh
+
+      - name: Upload stress report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stress-report
+          path: tests/stress/STRESS-REPORT.md
+          if-no-files-found: error

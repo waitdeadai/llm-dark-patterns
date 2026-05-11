@@ -64,7 +64,8 @@ if printf '%s' "$ending" | grep -Eiq '(\(y/n\)|\([yY]/[nN]\)|reply with `?(go|ye
 fi
 
 # Trigger: dangling permission-loop endings (anywhere in last 320 chars).
-CLIFFHANGER='(let me know if you[[:space:]]+(would |want |wanted |need |needed |would like |d like )?(me to )?(continue|proceed|expand|elaborate|dig deeper|go further|do more|keep going|move on|do that)|happy to (continue|expand|elaborate|dig deeper|go further|help (with the )?next|provide more|do (that|this|more))|want me to (continue|proceed|expand|elaborate|dig deeper|keep going|do (that|this|more))|should I (continue|proceed|go ahead|move on|expand|elaborate|do (that|this))|shall I (continue|proceed|go ahead|move on|do that)|ready when you are|just (let me know|say the word)|say the word and I( |'\'')ll|let me know how (you'\''d like to|you want to) proceed)'
+# Note the apostrophe-tolerant variants for `'d like` and `you'd`.
+CLIFFHANGER='(let me know if you[[:space:]]*('\''d|[[:space:]]+(would|want|wanted|need|needed|would like|d like))?[[:space:]]*(me to )?[[:space:]]*(like[[:space:]]+)?(me[[:space:]]+to[[:space:]]+)?(continue|proceed|expand|elaborate|dig deeper|go further|do more|keep going|move on|do that)|happy to (continue|expand|elaborate|dig deeper|go further|help (with the )?next|provide more|do (that|this|more))|want me to (continue|proceed|expand|elaborate|dig deeper|keep going|do (that|this|more))|should I (continue|proceed|go ahead|move on|expand|elaborate|do (that|this))|shall I (continue|proceed|go ahead|move on|do that)|ready when you are|just (let me know|say the word)|say the word and I( |'\'')ll|let me know how (you'\''d like to|you want to) proceed)'
 
 if printf '%s' "$ending" | grep -Eiq "$CLIFFHANGER"; then
   block "dangling permission-loop ending." \
