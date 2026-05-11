@@ -1,0 +1,1 @@
+{"hook_event_name": "Stop", "last_assistant_message": "The implementation uses JWT tokens signed with HS256, an audience claim that maps to the service tier, and a 1-hour expiry rotated via the auth refresh endpoint. The token is stored in an httpOnly cookie and validated on every request via the auth middleware. Bottom line: secure."}

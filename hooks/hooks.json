@@ -1,7 +1,7 @@
 {
   "_comment": [
-    "LLM Dark Patterns Hooks — bundled plugin wiring for all 21 hooks.",
-    "Stop / SubagentStop fan out to 17 closeout-language hooks plus the state-stop continuity refresh.",
+    "LLM Dark Patterns Hooks — bundled plugin wiring for all 28 hooks.",
+    "Stop / SubagentStop fan out to 24 closeout-language hooks plus the state-stop continuity refresh.",
     "TaskCreated wires no-handoff-loop + no-credential-leak. TaskCompleted wires no-ownership-violation.",
     "PreToolUse / PostToolUse wire no-vibes side checks plus no-approval-sneak.",
     "PreCompact / PostCompact / SessionStart wire the no-amnesia continuity branch.",
@@ -28,6 +28,13 @@
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-phantom-tool-call.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-sandbagging-disguise.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-rollback-claim-without-evidence.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-emoji-spam.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-tldr-bait.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-meta-commentary.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-prompt-restate.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-disclaimer-spam.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-ai-tells.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-roleplay-drift.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/state-stop.sh\"", "timeout": 10 }
         ]
       }
@@ -50,7 +57,14 @@
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-credential-leak-in-handoff.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-phantom-tool-call.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-sandbagging-disguise.sh\"", "timeout": 5 },
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-rollback-claim-without-evidence.sh\"", "timeout": 5 }
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-rollback-claim-without-evidence.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-emoji-spam.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-tldr-bait.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-meta-commentary.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-prompt-restate.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-disclaimer-spam.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-ai-tells.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-roleplay-drift.sh\"", "timeout": 5 }
         ]
       }
     ],

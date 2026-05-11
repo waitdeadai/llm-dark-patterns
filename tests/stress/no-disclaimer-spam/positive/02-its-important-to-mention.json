@@ -1,0 +1,1 @@
+{"hook_event_name": "Stop", "last_assistant_message": "Migration done. It's important to mention that the rollback path is via git revert."}
