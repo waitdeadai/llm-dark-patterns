@@ -10,8 +10,9 @@ This repo is the **umbrella** for a series of small bash hooks. Each hook is a s
 
 LLM "dark patterns" is now an academically-recognized category:
 
-- **DarkBench** ([emergentmind summary](https://www.emergentmind.com/topics/darkbench)) — 660 prompts across 6 dark-pattern categories. **48% of LLM conversations trigger at least one dark pattern.**
-- **AAAI 2026** ([Lighting Up or Dimming Down? Exploring Dark Patterns of LLMs in Co-Creativity](https://arxiv.org/html/2604.04735v1)) — identifies 5 patterns: sycophancy, tone policing, moralizing, loop of death, anchoring. **Sycophancy at 91.7% prevalence.**
+- **DarkBench** (Kran et al. 2025, ICLR 2025, [arXiv:2503.10728](https://arxiv.org/abs/2503.10728)) — 660 prompts across 6 dark-pattern categories. **48% of LLM conversations trigger at least one dark pattern.**
+- **DarkBench+** (Liu et al. 2026, [AAAI 2026 main conference](https://ojs.aaai.org/index.php/AAAI/article/view/41103)) — extended benchmark testing **~40 mainstream LLMs** across **10 major categories and 24 subcategories**. First specialized evaluation dimensions for reasoning models. Bilingual (Chinese/English).
+- **AAAI 2026 Spring Symposium** (Li, Qu, Chang 2026, [Lighting Up or Dimming Down?](https://arxiv.org/abs/2604.04735)) — co-creativity study identifying 5 patterns: sycophancy, tone policing, moralizing, loop of death, anchoring. **Sycophancy at 91.7% prevalence.**
 - **IEEE S&P 2026** ([Investigating the Impact of Dark Patterns on LLM-Based Web Agents](https://arxiv.org/html/2510.18113)) — agents susceptible 41% of the time to a single dark pattern.
 - **CHI 2026** ([The Siren Song of LLMs](https://arxiv.org/html/2509.10830v3)) — user-perception study; users normalize dark patterns as "ordinary assistance."
 - **DarkPatterns-LLM** ([Dec 2025 benchmark](https://arxiv.org/html/2512.22470v1)) — 7 harm categories.

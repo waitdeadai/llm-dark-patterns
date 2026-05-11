@@ -2,8 +2,11 @@
 # Claude Code hook: block praise-spam at turn open ("Great question!", "Excellent!").
 # Bash judge, out-of-band, model-can't-rewrite. Complement to skill-based and
 # system-prompt-based anti-sycophancy defenses (FutureSpeakAI/anti-sycophancy,
-# 0xcjl/anti-sycophancy). Rooted in DarkBench / AAAI 2026 framing of sycophancy
-# as the most prevalent LLM dark pattern (91.7% prevalence in co-creativity study).
+# 0xcjl/anti-sycophancy). Rooted in DarkBench (Kran et al. 2025, ICLR 2025,
+# arXiv:2503.10728), DarkBench+ (Liu et al. 2026, AAAI 2026 main conference,
+# 40 LLMs across 10 categories), and Li et al. 2026 (arXiv:2604.04735, AAAI
+# 2026 Spring Symposium) which puts sycophancy at 91.7% prevalence in the
+# co-creativity setting.
 
 set -euo pipefail
 
@@ -73,7 +76,10 @@ if printf '%s' "$opening" | grep -Eiq "$SYCOPHANCY"; then
 "- The operator did not ask for praise. Drop the opening compliment.
 - Lead with the substantive answer, not validation.
 - Anthropic's own measurements: sycophancy in 9% of guidance-seeking chats.
-  AAAI 2026 co-creativity study: 91.7% prevalence.
+  Li et al. 2026 (arXiv:2604.04735, AAAI 2026 Spring Symposium): 91.7%
+  prevalence in the co-creativity setting.
+  Liu et al. 2026 (DarkBench+, AAAI 2026 main conference): tested ~40
+  mainstream LLMs across 10 dark-pattern categories.
 - If the operator did request praise/encouragement and the hook misfired,
   restate the request in the next turn so the allow-clause matches
   (e.g. start with 'You asked for encouragement — here's...')."

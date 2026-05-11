@@ -70,8 +70,13 @@ if printf '%s\n' "$message" | grep -Eiq "$RECALL"; then
         verify the recall is real, OR
     (b) Use neutral phrasing that doesn't claim recall — 'one approach is X',
         'a common pattern is Y' — instead of 'as we discussed, X'.
-- Citation: ACM IUI 2025 — generative chatbots induce 3x more false memories
-  than the control. The fix is verifiable recall, not assumed recall."
+- Citations:
+  Pataranutaporn et al. 2024 (arXiv:2408.04681) — generative chatbots
+  induce over 3x more immediate false memories than the control condition.
+  Pataranutaporn et al. 2025 (ACM IUI 2025, doi:10.1145/3708359.3712112) —
+  follow-up showing subtle in-conversation injection further amplifies the
+  effect.
+  The fix is verifiable recall, not assumed recall."
 fi
 
 exit 0

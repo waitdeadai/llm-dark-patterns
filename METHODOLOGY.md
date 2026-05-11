@@ -82,10 +82,10 @@ The first hook (`no-vibes`) was crystallized after watching Claude Opus 4.7 clos
 
 Before shipping, look up the academic literature for the failure mode. As of 2026 the field has matured enough that almost every interaction-style or fact-fabrication failure mode has at least one paper, benchmark, or industry writeup naming it. Examples used by this suite:
 
-- Sycophancy → [Sean Goedecke's "first LLM dark pattern" essay](https://www.seangoedecke.com/ai-sycophancy/), [DarkBench](https://www.emergentmind.com/topics/darkbench), [AAAI 2026 co-creativity study at 91.7% prevalence](https://arxiv.org/html/2604.04735v1), [CHI 2026 user-perception paper](https://arxiv.org/html/2509.10830v3).
+- Sycophancy → [Sean Goedecke's "first LLM dark pattern" essay](https://www.seangoedecke.com/ai-sycophancy/), [DarkBench (Kran et al. 2025, ICLR 2025, arXiv:2503.10728)](https://arxiv.org/abs/2503.10728), [DarkBench+ (Liu et al. 2026, AAAI 2026 main conference, ~40 LLMs across 10 categories)](https://ojs.aaai.org/index.php/AAAI/article/view/41103), [Li et al. 2026 AAAI Spring Symposium co-creativity study at 91.7% prevalence (arXiv:2604.04735)](https://arxiv.org/abs/2604.04735), [CHI 2026 user-perception paper](https://arxiv.org/html/2509.10830v3).
 - Citation hallucination → [NeurIPS papers shipped with hallucinated refs (Fortune 2026)](https://fortune.com/2026/01/21/neurips-ai-conferences-research-papers-hallucinations/), [GhostCite analysis](https://arxiv.org/html/2602.06718), 19.9% baseline fabrication rate.
 - Time-estimation failure → [Frontiers in AI 2026 on Story Points / LLM-mediated cost drivers](https://www.frontiersin.org/journals/artificial-intelligence/articles/10.3389/frai.2026.1772418/full), OpenAI Sep 2025 on training-rewarded bluffing.
-- False memory → [ACM IUI 2025 false-memory induction paper](https://dl.acm.org/doi/10.1145/3708359.3712112).
+- False memory → [Pataranutaporn et al. 2024 (arXiv:2408.04681), original 3x false-memory finding](https://arxiv.org/abs/2408.04681), [ACM IUI 2025 follow-up "Slip Through the Chat" (doi:10.1145/3708359.3712112) on subtle in-conversation injection](https://dl.acm.org/doi/10.1145/3708359.3712112).
 - Paternalism → Anthropic's own [Constitution](https://www.anthropic.com/constitution) ("paternalism and moralizing are disrespectful").
 
 The literature serves three purposes:
