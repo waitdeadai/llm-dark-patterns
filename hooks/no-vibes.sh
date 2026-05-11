@@ -1,0 +1,370 @@
+#!/bin/bash
+# Claude Code hook: block destructive Bash and low-evidence positive closeout.
+# Extra hook events fail open unless the payload is clearly dangerous.
+
+set -euo pipefail
+
+INPUT="$(cat)"
+
+if ! command -v jq >/dev/null 2>&1; then
+  echo "NOTE: no-vibes hook requires jq; fail-open for this event." >&2
+  exit 0
+fi
+
+json_get() {
+  local filter="$1"
+  printf '%s' "$INPUT" | jq -r "$filter // empty" 2>/dev/null || true
+}
+
+extract_file_paths() {
+  printf '%s' "$INPUT" | jq -r '
+    [
+      .tool_input.file_path?,
+      .tool_input.path?,
+      .tool_input.filename?,
+      .tool_input.file?,
+      .tool_input.files?,
+      .tool_input.paths?,
+      .tool_input.edits[]?.file_path?,
+      .tool_response.file_path?,
+      .tool_response.path?,
+      .result.file_path?,
+      .result.path?
+    ]
+    | flatten
+    | .[]?
+    | select(type == "string" and length > 0)
+  ' 2>/dev/null || true
+}
+
+collect_task_text() {
+  printf '%s' "$INPUT" | jq -r '
+    [
+      .task.title?,
+      .task.description?,
+      .task.prompt?,
+      .task.instructions?,
+      .task_input?,
+      .prompt?,
+      .description?,
+      .message?,
+      .tool_input.description?,
+      .tool_input.prompt?,
+      .tool_input.input?,
+      .tool_input.tasks[]?.title?,
+      .tool_input.tasks[]?.description?,
+      .tool_input.tasks[]?.prompt?
+    ]
+    | flatten
+    | .[]?
+    | select(type == "string" and length > 0)
+  ' 2>/dev/null || true
+}
+
+collect_completion_text() {
+  printf '%s' "$INPUT" | jq -r '
+    [
+      .task.result?,
+      .task.summary?,
+      .task_result?,
+      .result?,
+      .summary?,
+      .last_assistant_message?,
+      .assistant_message?,
+      .message?,
+      .output?,
+      .tool_response.content?,
+      .tool_response.result?
+    ]
+    | flatten
+    | .[]?
+    | select(type == "string" and length > 0)
+  ' 2>/dev/null || true
+}
+
+collect_failure_text() {
+  printf '%s' "$INPUT" | jq -r '
+    [
+      .error?,
+      .tool_error?,
+      .message?,
+      .tool_response.error?,
+      .tool_response.stderr?,
+      .result.error?,
+      .result.stderr?
+    ]
+    | flatten
+    | .[]?
+    | select(type == "string" and length > 0)
+  ' 2>/dev/null || true
+}
+
+block() {
+  local reason="$1"
+  local repair="${2:-}"
+  echo "BLOCKED: $reason" >&2
+  if [ -n "$repair" ]; then
+    echo "" >&2
+    echo "Repair guidance:" >&2
+    printf '%s\n' "$repair" >&2
+  fi
+  exit 2
+}
+
+if ! printf '%s' "$INPUT" | jq -e . >/dev/null 2>&1; then
+  exit 0
+fi
+
+event="$(json_get '.hook_event_name')"
+
+is_destructive_bash() {
+  local command="$1"
+  local candidate
+  local pattern
+  local patterns=(
+    '(^|[[:space:];&|])sudo[[:space:]]+rm[[:space:]].*(-[[:alnum:]]*r|--recursive)([[:space:]]|$)'
+    '(^|[[:space:];&|])rm[[:space:]]+(-[[:alnum:]]*r[[:alnum:]]*|--recursive)([[:space:]]|$)'
+    '(^|[[:space:];&|])rm[[:space:]]+-[[:alnum:]]*f[[:alnum:]]*[[:space:]]+/'
+    '(^|[[:space:];&|])git[[:space:]]+reset[[:space:]]+--hard([[:space:]]|$)'
+    '(^|[[:space:];&|])git[[:space:]]+clean[[:space:]]+-[[:alnum:]]*(f[[:alnum:]]*d|d[[:alnum:]]*f)'
+    '(^|[[:space:];&|])git[[:space:]]+checkout[[:space:]]+--[[:space:]]'
+    '(^|[[:space:];&|])find[[:space:]].*[[:space:]]-delete([[:space:]]|$)'
+    '(^|[[:space:];&|])mkfs(\.[[:alnum:]_-]+)?([[:space:]]|$)'
+    '(^|[[:space:];&|])dd[[:space:]].*[[:space:]]of=/dev/'
+    '(^|[[:space:];&|])chmod[[:space:]]+-R[[:space:]]+777([[:space:]]|$)'
+  )
+
+  for candidate in "$command" "$(printf '%s\n' "$command" | sed "s/['\"\\\\]/ /g")"; do
+    for pattern in "${patterns[@]}"; do
+      if printf '%s\n' "$candidate" | grep -Eiq -- "$pattern"; then
+        return 0
+      fi
+    done
+  done
+
+  return 1
+}
+
+is_write_tool() {
+  case "$1" in
+    Edit|Write|MultiEdit|NotebookEdit) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_sensitive_write_path() {
+  local path="$1"
+  path="${path#./}"
+
+  case "$path" in
+    .env|.env.*|*/.env|*/.env.*) return 0 ;;
+    secrets|secrets/*|*/secrets|*/secrets/*) return 0 ;;
+    .claude/settings.local.json|*/.claude/settings.local.json) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+is_read_only_text() {
+  local message="$1"
+  printf '%s\n' "$message" | grep -Eiq '(^|[^[:alpha:]])(read-only|read only|audit only|research only|analysis only|inspect only|review only|no edits?|no file changes?|without edits?|without editing|do not edit|do not modify)([^[:alpha:]]|$)'
+}
+
+is_implementation_like_text() {
+  local message="$1"
+  if is_read_only_text "$message"; then
+    return 1
+  fi
+  printf '%s\n' "$message" | grep -Eiq '(^|[^[:alpha:]])(implement|implementation|edit|write|modify|patch|fix|refactor|build|create|add|update|delete|change|wire|integrate|land|ship)(ing|ed|es|s)?([^[:alpha:]]|$)'
+}
+
+has_task_ownership() {
+  local message="$1"
+  printf '%s\n' "$message" | grep -Eiq '(ownership|owned files?|owned paths?|owns?:|owner:|must not touch|do not edit|do not modify|only edit|scope:|disjoint files?)'
+}
+
+block_sensitive_write_paths() {
+  local file_paths file_path
+  file_paths="$(extract_file_paths)"
+  if [ -z "$file_paths" ]; then
+    return 0
+  fi
+
+  while IFS= read -r file_path; do
+    if [ -n "$file_path" ] && is_sensitive_write_path "$file_path"; then
+      block "write tool touched sensitive env/secret path: $file_path" \
+        "- Do not edit .env, .env.*, .claude/*.local.json, or secrets/**.
+- Ask the operator for a safe non-secret target path or a redacted example file."
+    fi
+  done <<< "$file_paths"
+}
+
+has_positive_closeout() {
+  local message="$1"
+  if printf '%s\n' "$message" | grep -Eiq '(^|[^[:alpha:]])(not done|not complete|not completed|not ready|incomplete|unfinished)([^[:alpha:]]|$)'; then
+    return 1
+  fi
+  printf '%s\n' "$message" | grep -Eiq '(^|[^[:alpha:]])(all set|done|completed|complete|implemented|fixed|finished|ready|passes|passed|shipped)([^[:alpha:]]|$)'
+}
+
+has_missing_verification() {
+  local message="$1"
+  printf '%s\n' "$message" | grep -Eiq '(^|[^[:alpha:]])(no[[:space:]]+tests?[[:space:]]+(run|ran)|tests?[[:space:]]+(not[[:space:]]+run|not[[:space:]]+ran|skipped|omitted)|not[[:space:]]+tested|untested|unverified|not[[:space:]]+verified|verification[[:space:]]+(not[[:space:]]+run|not[[:space:]]+ran|skipped|omitted|pending|missing)|verification[[:space:]]+was[[:space:]]+not[[:space:]]+run|could[[:space:]]+not[[:space:]]+verify|unable[[:space:]]+to[[:space:]]+verify)([^[:alpha:]]|$)' && return 0
+  return 1
+}
+
+has_command_evidence() {
+  local message="$1"
+  printf '%s\n' "$message" | grep -Eiq '(^|[[:space:]])commands?[[:space:]]+run:' && return 0
+  printf '%s\n' "$message" | grep -Eiq '`(bash|git|npm|pnpm|yarn|pytest|python3?|ruff|cargo|go test|make)[^`]*`' && return 0
+  return 1
+}
+
+has_verification_evidence() {
+  local message="$1"
+  printf '%s\n' "$message" | grep -Eiq '(^|[[:space:]])(verification|verified|tests?|smoke|lint|build)(:|[[:space:]]+(passed|pass|ok|succeeded|clean|green))' && return 0
+  return 1
+}
+
+has_artifact_evidence() {
+  local message="$1"
+  printf '%s\n' "$message" | grep -Eiq '(^|[[:space:]])(changed files?|files? changed|files? inspected|sources? reviewed|source ledger|diff|artifacts?|evidence)(:|[[:space:]])' && return 0
+  return 1
+}
+
+has_evidence() {
+  local message="$1"
+  has_command_evidence "$message" && return 0
+  has_verification_evidence "$message" && return 0
+  has_artifact_evidence "$message" && return 0
+  return 1
+}
+
+has_closeout_evidence() {
+  local message="$1"
+  has_command_evidence "$message" && return 0
+  has_verification_evidence "$message" && return 0
+  if is_read_only_text "$message" && has_artifact_evidence "$message"; then
+    return 0
+  fi
+  return 1
+}
+
+has_failed_verification() {
+  local message="$1"
+  has_missing_verification "$message" && return 0
+  printf '%s\n' "$message" | grep -Eiq '(verification|verify|tests?|smoke|lint|build)[^[:cntrl:]]*(failed|failing|failure|error|errors|could not run|did not run|not run|unable to run|blocked)' && return 0
+  printf '%s\n' "$message" | grep -Eiq '(failed|failing|failure|error|errors|could not run|did not run|not run|unable to run|blocked)[^[:cntrl:]]*(verification|verify|tests?|smoke|lint|build)' && return 0
+  return 1
+}
+
+failed_verification_repair() {
+  cat <<'EOF'
+- Do not close with done/ready/passed/shipped while verification failed or did not run.
+- Either run the missing verification and cite the exact command evidence, or close as partial/blocked/runtime-pending.
+- Use a final shape like:
+  Status: partial
+  Verification: not run because <reason>
+  Next step: <specific command or blocker>
+EOF
+}
+
+missing_evidence_repair() {
+  cat <<'EOF'
+- Positive closeout needs concrete evidence, not just "done" or "ready".
+- Add at least one of:
+  Commands run: `<exact command>`
+  Verification: passed/blocked with detail
+- For implementation closeout, changed files alone are not enough.
+- For read-only work, include files inspected / sources reviewed.
+- If evidence is unavailable, close as partial/blocked/verification pending instead of done.
+EOF
+}
+
+tool_name="$(json_get '.tool_name')"
+
+if [ "$tool_name" = "Bash" ]; then
+  command="$(json_get '.tool_input.command')"
+  if [ -n "$command" ] && is_destructive_bash "$command"; then
+    block "destructive Bash command requires explicit human approval and a rollback plan." \
+      "- Ask the operator for explicit approval before destructive commands.
+- Include the exact command, affected paths, and rollback plan."
+  fi
+fi
+
+if is_write_tool "$tool_name"; then
+  block_sensitive_write_paths
+fi
+
+if [ "$event" = "PreToolUse" ] && [ "$tool_name" = "Bash" ]; then
+  exit 0
+fi
+
+if [ "$event" = "PostToolUse" ] && is_write_tool "$tool_name"; then
+  exit 0
+fi
+
+if [ "$event" = "TaskCreated" ]; then
+  task_text="$(collect_task_text)"
+  if [ -z "$task_text" ]; then
+    exit 0
+  fi
+
+  if is_implementation_like_text "$task_text" && ! has_task_ownership "$task_text"; then
+    block "implementation-like TaskCreated payload needs explicit ownership or read-only scope." \
+      "- Add owned paths, forbidden paths, and stop conditions to the task.
+- Or mark the task as read-only/audit-only if it must not edit files."
+  fi
+
+  exit 0
+fi
+
+if [ "$event" = "TaskCompleted" ]; then
+  task_text="$(collect_task_text)"
+  completion_text="$(collect_completion_text)"
+  combined_text="$(printf '%s\n%s' "$task_text" "$completion_text")"
+
+  if [ -z "$combined_text" ] || [ -z "$completion_text" ]; then
+    exit 0
+  fi
+
+  if is_implementation_like_text "$combined_text"; then
+    if has_failed_verification "$completion_text" && has_positive_closeout "$completion_text"; then
+      block "implementation task closeout conflicts with failed or missing verification." "$(failed_verification_repair)"
+    fi
+
+    if ! has_closeout_evidence "$completion_text"; then
+      block "implementation TaskCompleted payload needs concrete evidence." "$(missing_evidence_repair)"
+    fi
+  fi
+
+  exit 0
+fi
+
+if [ "$event" = "PostToolUseFailure" ]; then
+  failure_text="$(collect_failure_text)"
+  if [ -n "$failure_text" ]; then
+    echo "NOTE: tool failure observed; record command/error evidence before positive closeout." >&2
+  fi
+  exit 0
+fi
+
+if [ "$event" = "Stop" ] || [ "$event" = "SubagentStop" ]; then
+  if [ "$(json_get '.stop_hook_active')" = "true" ]; then
+    exit 0
+  fi
+
+  message="$(json_get '.last_assistant_message')"
+  if [ -z "$message" ]; then
+    exit 0
+  fi
+
+  if has_failed_verification "$message" && has_positive_closeout "$message"; then
+    block "positive closeout conflicts with failed or missing verification." "$(failed_verification_repair)"
+  fi
+
+  if has_positive_closeout "$message" && ! has_closeout_evidence "$message"; then
+    block "closeout needs concrete evidence." "$(missing_evidence_repair)"
+  fi
+fi
+
+exit 0

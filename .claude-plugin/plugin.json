@@ -1,0 +1,24 @@
+{
+  "name": "llm-dark-patterns",
+  "description": "A 10-hook suite that suppresses LLM dark-pattern defaults at the textual boundary. Catches false-success closeouts, training-cutoff confusion, unsolicited paternalism, sycophancy, permission-loops, vibe time estimates, fake recall, fake stats, fake citations, and context loss after auto-compaction. Out-of-band bash judges, model-can't-rewrite. Backed by AbstentionBench, Anthropic's Constitution, AAAI 2026 sycophancy research, and the CoT-faithfulness literature.",
+  "version": "0.1.0",
+  "author": {
+    "name": "waitdeadai",
+    "url": "https://github.com/waitdeadai"
+  },
+  "homepage": "https://github.com/waitdeadai/llm-dark-patterns",
+  "repository": "https://github.com/waitdeadai/llm-dark-patterns",
+  "license": "Apache-2.0",
+  "keywords": [
+    "claude-code",
+    "hooks",
+    "dark-patterns",
+    "anti-sycophancy",
+    "anti-hallucination",
+    "verification",
+    "governance",
+    "ai-safety",
+    "llm-safety",
+    "abstention"
+  ]
+}
