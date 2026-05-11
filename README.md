@@ -32,7 +32,9 @@ Ten hooks live as of 2026-05-11, organized in three branches by mechanism:
 
 Each is its own repo, single bash file (or bash + python3 for engine-heavier hooks), Apache-2.0, drop-in via `.claude/settings.json`, with reproducible-test receipts.
 
-> **New: see [METHODOLOGY.md](METHODOLOGY.md)** for the harness-engineering playbook used to discover and ship every hook in the suite. Lift it, apply it to other LLM-default failure modes, and ship more hooks.
+> **See [METHODOLOGY.md](METHODOLOGY.md)** for the harness-engineering playbook used to discover and ship every hook in the suite. Now includes the *Adversarial Discovery via Impossible Tasks* methodology backed by AbstentionBench, Anthropic's tracing-thoughts research, and the CoT-faithfulness literature.
+
+> **See [`waitdeadai/impossible-tasks`](https://github.com/waitdeadai/impossible-tasks)** — the discovery-engine companion repo. 30 impossible-task classes mapped to dishonest defaults mapped to existing or candidate hooks. 11 of 30 classes covered; 19 candidates remain, prioritized by difficulty.
 
 | Hook | Dark pattern | Mechanism | Repo |
 |---|---|---|---|

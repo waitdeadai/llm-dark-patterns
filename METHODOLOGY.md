@@ -189,6 +189,54 @@ Average time from identification to public release: 1–3 hours per hook for the
 
 ---
 
+## Adversarial Discovery via Impossible Tasks
+
+The discovery process in Phase 1 (*"notice the pattern in your own session"*) is the first half of how new patterns enter the suite. The systematic half is **adversarial probing via impossible tasks** — give the model a task it structurally cannot do, observe the dishonest pattern it defaults to instead of abstaining, and add the pattern to the suite.
+
+This methodology has substantial 2026 academic backing:
+
+- **AbstentionBench** ([arXiv 2506.09038](https://arxiv.org/pdf/2506.09038)) shows that *"abstention is an unsolved problem where scaling models is of little use"* across 5 categories of unanswerable question (unknown answers, underspecification, false premises, subjective interpretations, outdated information).
+- **Anthropic's [tracing-thoughts research](https://www.anthropic.com/research/tracing-thoughts-language-model)** confirms Claude *"sometimes makes up plausible-sounding steps to get where it wants to go"* — when the task is impossible, the model fabricates a chain of reasoning that ends at a confident guess instead of saying *"I don't know"*.
+- **CoT-Is-Not-Explainability** ([Oxford 2025](https://aigi.ox.ac.uk/wp-content/uploads/2025/07/Cot_Is_Not_Explainability.pdf)) and [Turpin et al. on unfaithful CoT](https://openreview.net/forum?id=bzs4uPLXvi) show the reasoning chain doesn't reflect the actual decision; accuracy drops by 36% on 13 tasks when models rationalize biased answers.
+- **Self-knowledge limits** ([Line of Duty](https://arxiv.org/abs/2503.11256)): "GPT-4o and Mistral Large are not sure of their own capabilities more than 80% of the time."
+- **Strawberry tokenization** ([2412.18626](https://arxiv.org/html/2412.18626v1)): models can spell a word, miscount its letters, and explain themselves confidently *"without detecting the inconsistency."*
+
+The literature has the *measurement* side mature (HalluLens, AbstainQA, TruthfulQA, AbstentionBench). What's missing is the *enforcement* side at the Stop-hook layer — that's the gap this suite fills.
+
+### The discovery-engine companion repo
+
+The suite has a dedicated discovery catalog at [`waitdeadai/impossible-tasks`](https://github.com/waitdeadai/impossible-tasks):
+
+- [`TASK_CLASSES.md`](https://github.com/waitdeadai/impossible-tasks/blob/main/TASK_CLASSES.md) — 30 impossible-task classes grouped by failure locus (no tool, no knowledge, no perception, no introspection, tokenization-bound, false-premise, memory loss).
+- [`DARK_PATTERNS_REVEALED.md`](https://github.com/waitdeadai/impossible-tasks/blob/main/DARK_PATTERNS_REVEALED.md) — per-class mapping from task → dishonest default → existing or candidate hook.
+- [`CANDIDATE_HOOKS.md`](https://github.com/waitdeadai/impossible-tasks/blob/main/CANDIDATE_HOOKS.md) — prioritized buildable list with difficulty ratings (1-5) and false-positive risk per candidate.
+- [`FIXTURES.md`](https://github.com/waitdeadai/impossible-tasks/blob/main/FIXTURES.md) — paste-and-observe prompts that surface each pattern in seconds.
+
+### Discovery loop
+
+The full discovery loop combines Phase 1 (passive observation) and Phase 7 (active probing):
+
+```text
+Pain-point observation  ─┐
+                         ├─►  Pattern named  ─►  Verified via published research  ─►  Hook shipped
+Adversarial probe (this) ─┘
+```
+
+Adversarial probing is the deterministic version of pain-point observation. If a class of impossible tasks reliably produces the same dishonest pattern across 5+ fresh sessions, the pattern is real and worth shipping a hook against.
+
+### How to apply it
+
+1. Pick a failure locus from [`TASK_CLASSES.md`](https://github.com/waitdeadai/impossible-tasks/blob/main/TASK_CLASSES.md) (or invent a new one).
+2. Write 3-5 fixture prompts that all live in that locus.
+3. Run them against a fresh Claude Code session. Note the dishonest phrasing each time.
+4. If a recognizable phrasing appears across ≥3 fixtures, you have a textual signature for a candidate hook.
+5. Apply the [4-step design pattern](#the-4-step-design-pattern) to ship the hook.
+6. PR back to `impossible-tasks` updating the coverage tables.
+
+The goal is not to catalog every impossible task — it's to systematically convert *kinds* of impossibility into shipped hooks. The current ratio is 11 of 30 classes covered; the next wave (`no-fake-perception`, `no-fake-cap`, `no-fake-future`) takes it to ~14 of 30.
+
+---
+
 ## When this methodology does not apply
 
 Three categories of LLM failure mode that **don't fit** this suite's mechanism. Different defense required:
