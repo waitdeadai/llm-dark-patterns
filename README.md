@@ -1,10 +1,25 @@
 # LLM Dark Patterns Hooks
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![tests](https://github.com/waitdeadai/llm-dark-patterns/actions/workflows/test.yml/badge.svg)](https://github.com/waitdeadai/llm-dark-patterns/actions/workflows/test.yml)
+[![stress fixtures](https://img.shields.io/badge/stress_fixtures-202%2F202_PASS-green)](tests/stress)
+[![unit tests](https://img.shields.io/badge/loader_tests-17%2F17_PASS-green)](tests/test-pack-loader.sh)
 
 > A suite of single-purpose Claude Code Stop hooks that suppress LLM dark-pattern defaults — sycophancy, paternalism, false-success, permission-loops, training-cutoff confidence — at the textual boundary, so power-user operators can actually work.
 
 This repo is the **umbrella** for a series of small bash hooks. Each hook is a separate repository, each catches one specific dark pattern, each follows the same architecture: out-of-band textual enforcement at `Stop` / `SubagentStop`. The judge is bash, not another LLM call. The model can't argue with grep.
+
+## What's shipped (as of 2026-05-11)
+
+| Phase | Surface | Status |
+|---|---|---|
+| Phase 1 — Locale loader + English pack | `lib/packs.sh`, `packs/locale/en.txt` | ✓ ships |
+| Phase 2 — Spanish + Polish locale packs | `packs/locale/{es,pl}.txt` | ✓ ships |
+| Phase 3 — Evidence binary allowlist (devops/k8s/cloud/database/system) | `packs/evidence/binaries.txt` (9 sections, 200+ binaries) | ✓ ships |
+| Phase 4 — Destructive command surface packs (filesystem, container, git-protected, config-overwrite, cloud-prod, database, service) | `packs/destructive/*.txt` (7 surfaces, 56 patterns) | ✓ ships |
+| Phase 5 — Bypass hardening (clause-local negation, evidence proximity + action-verb) | `hooks/no-vibes.sh` | ✓ ships |
+
+Operators with a non-English session, a non-app-dev toolchain, or a load-bearing destructive surface (kubectl, terraform, redis FLUSHALL, force-push to main) can extend coverage **without forking** by dropping a `.txt` into `${XDG_CONFIG_HOME:-$HOME/.config}/llm-dark-patterns/packs/<subdir>/<name>.txt`. See [ROADMAP.md](ROADMAP.md) for the architecture spec.
 
 ## Why this exists
 
@@ -49,6 +64,57 @@ Each is its own repo, single bash file (or bash + python3 for engine-heavier hoo
 | **no-fake-stats** | fabricated percentages, dollar amounts, large counts without source | block stat patterns unless message contains URL / "according to <Proper Noun>" / "(YYYY)" / strong neutral hedge | [waitdeadai/no-fake-stats](https://github.com/waitdeadai/no-fake-stats) |
 | **no-fake-cite** | citation patterns ("Smith et al., 2023", "[1]", "doi:") without verifiable URL | block citation patterns unless message contains a `https://` URL | [waitdeadai/no-fake-cite](https://github.com/waitdeadai/no-fake-cite) |
 | **no-amnesia** | context loss after auto-compaction | snapshot working state on Stop / PreCompact / PostCompact, rehydrate on SessionStart | [waitdeadai/no-amnesia](https://github.com/waitdeadai/no-amnesia) |
+
+## Loadable packs (operator-extensible without forking)
+
+Vocabulary, evidence binaries, and destructive command lists are now
+external `.txt` files. Operators can extend coverage by dropping new
+files at the XDG location — no fork, no PR required for local use.
+
+```
+packs/
+  locale/        # vocabulary used by no-vibes (positive_closeout, negation)
+    en.txt       # English (default, ships with repo)
+    es.txt       # Spanish (Latin American + Iberian forms)
+    pl.txt       # Polish (Tekalan-confirmed bootstrap)
+  evidence/
+    binaries.txt # binaries that count as command evidence in 9 sections:
+                 # app-dev, containers, k8s, devops, cloud, database,
+                 # shell-tools, system, archive, http (200+ binaries)
+  destructive/   # destructive command surfaces (operator opts in via env)
+    filesystem.txt        # rm -r/, dd, mkfs, find -delete, chmod -R 777,
+                          # git reset --hard, git clean -fd, git checkout --
+    container.txt         # docker stop/rm/prune, kubectl delete, helm
+                          # uninstall, argocd app delete
+    git-protected.txt     # git push --force, filter-branch, filter-repo,
+                          # branch -D, reflog expire
+    config-overwrite.txt  # in-place writes to .env*, .storage/, .ssh/,
+                          # .gnupg/, .kube/, secrets/
+    cloud-prod.txt        # terraform/tofu/pulumi destroy, terraform state
+                          # rm/mv, aws s3 rm --recursive, gcloud delete,
+                          # az delete, doctl delete
+    database.txt          # DROP TABLE/DATABASE/SCHEMA, TRUNCATE, FLUSHALL,
+                          # dropDatabase()
+    service.txt           # systemctl/service/launchctl/supervisorctl stop
+```
+
+**Discovery priority** (highest first):
+1. `$LLM_DARK_PATTERNS_PACK_DIR/<subdir>/<name>.txt` — explicit override
+2. `${XDG_CONFIG_HOME:-$HOME/.config}/llm-dark-patterns/packs/<subdir>/<name>.txt` — operator local
+3. `<repo>/packs/<subdir>/<name>.txt` — ships with repo
+
+**Locale selection**:
+- `$LLM_DARK_PATTERNS_LOCALE=en,es,pl` — explicit comma-separated
+- `${LANG:0:2}` — auto-detect when env unset (always layered on top of `en`)
+- `en` — final fallback
+
+**Surface opt-in for destructive packs**:
+- `LLM_DARK_PATTERNS_DESTRUCTIVE_PACKS=filesystem,container,git-protected` — subset
+- Default: all 7 surfaces active
+
+**Evidence category opt-in**:
+- `LLM_DARK_PATTERNS_EVIDENCE_CATEGORIES=app-dev,devops,k8s` — subset
+- Default: all 9 categories active
 
 ## Architecture (the pattern that generalizes)
 
