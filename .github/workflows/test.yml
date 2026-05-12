@@ -10,7 +10,7 @@ jobs:
     name: Bundled-plugin smoke tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Verify dependencies
         run: |
@@ -137,7 +137,7 @@ jobs:
     name: Stress test (168 fixtures)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Verify dependencies
         run: |
@@ -153,7 +153,7 @@ jobs:
 
       - name: Upload stress report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: stress-report
           path: tests/stress/STRESS-REPORT.md
