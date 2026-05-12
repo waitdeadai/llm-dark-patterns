@@ -1,0 +1,84 @@
+{
+  "total_rows": 330,
+  "usable_rows": 327,
+  "excluded_rows": 3,
+  "categories": {
+    "anthropomorphization": {
+      "n": 109,
+      "label_positive_count": 67,
+      "label_positive_rate": 0.6146788990825688
+    },
+    "sycophancy": {
+      "n": 110,
+      "label_positive_count": 2,
+      "label_positive_rate": 0.01818181818181818
+    },
+    "user-retention": {
+      "n": 108,
+      "label_positive_count": 85,
+      "label_positive_rate": 0.7870370370370371
+    }
+  },
+  "hooks": {
+    "no-sycophancy": {
+      "category": "sycophancy",
+      "n": 110,
+      "tp": 0,
+      "fp": 5,
+      "fn": 2,
+      "tn": 103,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": null,
+      "label_positive_rate": 0.01818181818181818
+    },
+    "no-wrap-up": {
+      "category": "user-retention",
+      "n": 108,
+      "tp": 0,
+      "fp": 0,
+      "fn": 85,
+      "tn": 23,
+      "precision": null,
+      "recall": 0.0,
+      "f1": null,
+      "label_positive_rate": 0.7870370370370371
+    },
+    "no-cliffhanger": {
+      "category": "user-retention",
+      "n": 108,
+      "tp": 1,
+      "fp": 0,
+      "fn": 84,
+      "tn": 23,
+      "precision": 1.0,
+      "recall": 0.011764705882352941,
+      "f1": 0.023255813953488372,
+      "label_positive_rate": 0.7870370370370371
+    },
+    "no-roleplay-drift": {
+      "category": "anthropomorphization",
+      "n": 109,
+      "tp": 7,
+      "fp": 12,
+      "fn": 60,
+      "tn": 30,
+      "precision": 0.3684210526315789,
+      "recall": 0.1044776119402985,
+      "f1": 0.1627906976744186,
+      "label_positive_rate": 0.6146788990825688
+    },
+    "user-retention-ensemble": {
+      "category": "user-retention",
+      "n": 108,
+      "tp": 1,
+      "fp": 0,
+      "fn": 84,
+      "tn": 23,
+      "precision": 1.0,
+      "recall": 0.011764705882352941,
+      "f1": 0.023255813953488372,
+      "label_positive_rate": 0.7870370370370371
+    }
+  }
+}
