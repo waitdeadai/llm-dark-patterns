@@ -82,7 +82,7 @@ if printf '%s' "$opening" | grep -Eiq "$SYCOPHANCY"; then
   if printf '%s' "$body_window" | grep -Eiq "$DISAGREEMENT_RE"; then
     : # redemption
   else
-    block "Tier 1 — praise-spam at turn open without disagreement in body." \
+    block "praise-spam at turn open without disagreement in body (Tier 1)." \
 "- Opener used praise-spam vocabulary AND body did not contain
   disagreement/honest-pushback markers within first 800 chars.
 - v1 train-set evidence: 5 of 5 FPs had opener-praise + body
