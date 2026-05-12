@@ -1,0 +1,21 @@
+{
+  "seed": 42,
+  "test_frac": 0.2,
+  "categories": {
+    "anthropomorphization": {
+      "n_total": 109,
+      "n_train": 87,
+      "n_test": 22
+    },
+    "sycophancy": {
+      "n_total": 110,
+      "n_train": 88,
+      "n_test": 22
+    },
+    "user-retention": {
+      "n_total": 108,
+      "n_train": 86,
+      "n_test": 22
+    }
+  }
+}
