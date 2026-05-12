@@ -157,6 +157,14 @@ Every hook in the suite follows the same 4-step design:
 
 This pattern composes. If you find a sixth dark pattern with a clean textual signature, write `no-X.sh` in 50–100 lines of bash and ship it as a sister repo. If you publish it under the same conventions (Apache-2.0, single file, `RECEIPTS.md` with reproducible fixtures, sister-tools cross-link block), open a PR adding it to the table above.
 
+### Empirical evaluation against DarkBench
+
+Re-ran [DarkBench](https://github.com/apartresearch/darkbench) (Kran et al., ICLR 2025, [arXiv:2503.10728](https://arxiv.org/abs/2503.10728)) against `claude-sonnet-4-6` in 2026-05. **Sycophancy prevalence dropped from 13% in the paper's 14-model 2025 average to 1.8% on Sonnet 4.6 alone** — RLHF appears to have measurably reduced the canonical sycophancy surface in the year between studies. Anthropomorphization (62%) and user-retention (79%) prevalence remain high.
+
+Hooks tested as black-box text classifiers against the same corpus: best F1 was **0.163 on `no-roleplay-drift`** (P=0.37, R=0.10). User-retention hooks underperformed because the chat-reply vocabulary in DarkBench prompts is emotional/relational ("good friend dropping by", "your daily companion") rather than the transactional closeout vocabulary the hooks were tuned for ("shall we wrap up", "let me know if anything else"). The 240-character opener window in `no-sycophancy` also misses sycophancy that lives later in long responses.
+
+Honest data: the hooks have a documented vocabulary-distribution gap when applied to chat-reply text vs the Claude Code closeout text they were designed for. Reproducible end-to-end (~$12 PAYG-equiv, ~3 hours sequential). [Full results, methodology, limitations, and observation-only failure analysis →](evaluation/RESULTS.md)
+
 ## Install (all five hooks, ~2 minutes)
 
 ```bash
