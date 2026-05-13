@@ -5,9 +5,20 @@
 [![stress fixtures](https://img.shields.io/badge/stress_fixtures-337%2F337_PASS-green)](tests/stress)
 [![unit tests](https://img.shields.io/badge/loader_tests-17%2F17_PASS-green)](tests/test-pack-loader.sh)
 
-> A suite of single-purpose Claude Code Stop hooks that suppress LLM dark-pattern defaults — sycophancy, paternalism, false-success, permission-loops, training-cutoff confidence — at the textual boundary, so power-user operators can actually work.
+> A suite of single-purpose Claude Code hooks that suppress LLM dark-pattern defaults — sycophancy, paternalism, false-success, permission-loops, training-cutoff confidence, and compaction amnesia — at the textual boundary, so power-user operators can actually work.
 
-This repo is the **umbrella** for a series of small bash hooks. Each hook is a separate repository, each catches one specific dark pattern, each follows the same architecture: out-of-band textual enforcement at `Stop` / `SubagentStop`. The judge is bash, not another LLM call. The model can't argue with grep.
+This repo is the **umbrella** for a series of small hook repos plus the
+research-grade closeout physics engine in
+[waitdeadai/agent-closeout-bench](https://github.com/waitdeadai/agent-closeout-bench).
+Each standalone hook remains separately installable. The physics-backed lane
+uses one reproducible engine with per-category rule packs, fixtures, and
+decision JSON.
+
+The shared architecture is out-of-band textual enforcement at Claude Code hook
+boundaries. The judge is deterministic code, not another LLM call. That means
+the model cannot modify the hook's code path from inside its closeout text; it
+does not mean the system is impossible to bypass, misconfigure, or evade by
+paraphrase.
 
 ## What's shipped (as of 2026-05-11)
 
@@ -36,7 +47,7 @@ LLM "dark patterns" is now an academically-recognized category:
 
 The category is real. The academic side measures and benchmarks. The tooling side — until now — has been mostly system-prompt calibrators ([FutureSpeakAI/anti-sycophancy](https://github.com/FutureSpeakAI/anti-sycophancy)) and in-context skills ([0xcjl/anti-sycophancy](https://github.com/0xcjl/anti-sycophancy)). Both live inside the model's reasoning loop. Both can be drifted past on long sessions. Neither survives the hard adversarial case where the model has every incentive to ignore them.
 
-The **LLM Dark Patterns Hooks** suite is the out-of-band complement: bash judges that inspect the model's outgoing text and refuse to let dark-patterned closeouts through.
+The **LLM Dark Patterns Hooks** suite is the out-of-band complement: deterministic judges that inspect the model's outgoing text and refuse to let dark-patterned closeouts through.
 
 ### Field reports — what this looks like to real users
 
@@ -146,6 +157,50 @@ packs/
 - `LLM_DARK_PATTERNS_EVIDENCE_CATEGORIES=app-dev,devops,k8s` — subset
 - Default: all 9 categories active
 
+## Physics-backed closeout engines
+
+The paper-grade, benchmark-backed lane lives in
+[waitdeadai/agent-closeout-bench](https://github.com/waitdeadai/agent-closeout-bench).
+It is not a replacement for the small standalone hooks; it is the reproducible
+engine layer that makes closeout mechanics testable, hashable, and comparable.
+
+Current physics-backed adapters:
+
+| Adapter hook | Category engine | Use |
+|---|---|---|
+| `no-vibes.sh` | `evidence_claims` | block completion/verification claims without evidence markers |
+| `no-wrap-up.sh` | `wrap_up` | block generic retention tails |
+| `no-cliffhanger.sh` | `cliffhanger` | block dangling permission loops |
+| `no-roleplay-drift.sh` | `roleplay_drift` | block persona drift replacing useful status |
+| `no-sycophancy.sh` | `sycophancy` | block praise/validation before substance |
+
+Install all physics-backed adapters from a clone of AgentCloseoutBench:
+
+```bash
+git clone https://github.com/waitdeadai/agent-closeout-bench
+cd agent-closeout-bench
+bash adapters/claude-code/install.sh /path/to/your/project
+bash scripts/hook-smoke.sh
+```
+
+Install one adapter:
+
+```bash
+bash adapters/claude-code/install.sh /path/to/your/project no-cliffhanger
+```
+
+The adapter installer writes a `.claude/settings.agentcloseout.example.json`
+snippet for Claude Code. Merge the entries you want into `.claude/settings.json`.
+
+For research, fixtures, public-data intake, human-labeling protocol, and
+collaboration telemetry, use AgentCloseoutBench directly:
+
+```bash
+bin/agentcloseout-physics lint-rules rules/closeout
+bin/agentcloseout-physics test-rules rules/closeout fixtures/closeout
+bin/agentcloseout-physics telemetry-preview --queue /path/to/local-queue.jsonl
+```
+
 ## Architecture (the pattern that generalizes)
 
 Every hook in the suite follows the same 4-step design:
@@ -165,7 +220,10 @@ Hooks tested as black-box text classifiers against the same corpus: best F1 was 
 
 Honest data: the hooks have a documented vocabulary-distribution gap when applied to chat-reply text vs the Claude Code closeout text they were designed for. Reproducible end-to-end (~$12 PAYG-equiv, ~3 hours sequential). [Full results, methodology, limitations, and observation-only failure analysis →](evaluation/RESULTS.md)
 
-## Install (all five hooks, ~2 minutes)
+## Install standalone hooks
+
+The standalone repos are still the simplest daily-use path. Install the single
+file hooks:
 
 ```bash
 mkdir -p .claude/hooks
@@ -185,7 +243,7 @@ done
 
 Then merge each repo's `settings.example.json` `hooks` block into your `.claude/settings.json`. Each hook is independent — you can install any subset.
 
-Requires `jq` (and `python3` for `time-anchor`).
+Requires `jq` (and `python3` for `time-anchor` and `no-amnesia`).
 
 ## Pitch / framing
 

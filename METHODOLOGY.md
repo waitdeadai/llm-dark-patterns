@@ -14,7 +14,7 @@ Every dark pattern this suite catches has a **textual signature** — a recogniz
 
 Two corollaries:
 
-- **The judge is not the same kind of thing as the actor.** Bash judges; LLM acts. The model can't argue with grep. This is the same property that makes type systems beat "be careful with types" and CI beat "remember to run the tests."
+- **The judge is not the same kind of thing as the actor.** Bash judges; LLM acts. No LLM call decides the verdict. This is the same property that makes type systems beat "be careful with types" and CI beat "remember to run the tests."
 - **Repair-template > bare block.** A bare block stalls the conversation. A block + the literal compliant shape lets the model self-correct in one turn.
 
 If a failure mode does not have a textual signature, this methodology does not apply. Use a different defense (LLM-as-judge, runtime sandboxing, structural enforcement at the tool layer).
@@ -263,6 +263,87 @@ Ship those via a different framework. Don't force them into a Stop hook with a b
 ## Citation
 
 If you build a hook using this methodology, the suite would value a back-link in your README under "Methodology" or "Acknowledgments." Apache-2.0 doesn't require it; the courtesy compounds.
+
+---
+
+## Two Compatible Lanes
+
+### Standalone hook lane
+
+Each hook repo remains separately installable. This is the daily-use lane for
+operators who want small Bash/JQ/Python hooks they can inspect in one sitting.
+
+Standalone repos must include:
+
+- Apache-2.0 license;
+- installation instructions;
+- Claude Code settings example;
+- reproducible receipts or tests;
+- narrow detection scope;
+- allow clauses for legitimate near misses.
+
+### Physics-backed lane
+
+AgentCloseoutBench provides the reproducible engine lane:
+
+- Rust CLI: `agentcloseout-physics`;
+- per-category rule packs under `rules/closeout/`;
+- per-category engine manifests under `engines/`;
+- Claude Code adapters under `adapters/claude-code/`;
+- rule linting and fixture tests;
+- public-data intake with license and privacy gates;
+- opt-in content-free telemetry commands.
+
+The physics-backed lane lets the same category mechanics serve two jobs:
+
+- daily user protection through Claude Code hook adapters;
+- scientific evaluation through deterministic fixtures, rule-pack hashes, and
+  benchmark outputs.
+
+## Current Physics Mapping
+
+| Hook surface | Physics category | AgentCloseoutBench path |
+|---|---|---|
+| `no-vibes` | `evidence_claims` | `engines/evidence_claims/ENGINE.md` |
+| `no-wrap-up` | `wrap_up` | `engines/wrap_up/ENGINE.md` |
+| `no-cliffhanger` | `cliffhanger` | `engines/cliffhanger/ENGINE.md` |
+| `no-roleplay-drift` | `roleplay_drift` | `engines/roleplay_drift/ENGINE.md` |
+| `no-sycophancy` | `sycophancy` | `engines/sycophancy/ENGINE.md` |
+| shared closeout protocol | `closeout_contract` | `engines/closeout_contract/ENGINE.md` |
+
+Other standalone hooks remain intentionally small until a public-data-backed
+physics category exists for them.
+
+## Collaboration Model
+
+Community contributions can help in three ways:
+
+- propose false-positive and false-negative fixtures;
+- propose new textual mechanics with examples and near misses;
+- contribute opt-in content-free telemetry summaries from AgentCloseoutBench.
+
+No raw prompt, raw completion, tool output, file content, system prompt, API key,
+absolute path, repo URL, email, username, hostname, IP, or stable user/session
+identifier should be submitted as a minimal telemetry record.
+
+Candidate rules do not become trusted enforcement until they are reviewed,
+versioned, fixture-tested, and included in a checksummed rule pack.
+
+## Scientific Claim Discipline
+
+Safe wording:
+
+> Out-of-band deterministic enforcement at the agentic coding assistant closeout
+> boundary makes specific dark-pattern and false-closeout mechanics observable,
+> reproducible, and benchmarkable.
+
+Avoid:
+
+- "prompt-injection-proof";
+- "impossible to bypass";
+- "universal dark-pattern detector";
+- "human-annotated benchmark" before adjudicated labels exist;
+- "SOTA robustness" before human-gold and public-derived evaluations support it.
 
 ---
 
