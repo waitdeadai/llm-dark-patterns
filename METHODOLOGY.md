@@ -70,9 +70,11 @@ The template is the load-bearing part. Most hooks fail not because the regex is 
 
 ---
 
-## Discovery process — how the suite's 10 hooks were found
+## Discovery process — how the original standalone batch was found
 
-This is the actual sequence used in May 2026 to ship the suite. Replicable for the next 10 hooks.
+This is the actual sequence used in May 2026 to ship the first standalone
+hooks. It is still the playbook for new standalone repos and for promoting an
+umbrella-only legacy hook into a separately installable repo.
 
 ### Phase 1 — Notice the pattern in your own session
 
@@ -143,44 +145,68 @@ When a new hook ships, four updates happen in batch:
 3. Umbrella table gets a new row.
 4. Umbrella install loop adds the new hook name.
 
-Total update time: ~15 minutes for 9 sibling repos.
+Total update time for a new standalone hook is the sibling count plus umbrella
+metadata. Umbrella-only legacy hooks can skip sibling README churn until a
+public standalone repo exists.
 
 ---
 
 ## Suite topology
 
-The 10 hooks live in three branches by mechanism:
+The catalog is tracked in three packaging lanes and six mechanism branches.
+Packaging answers "where does an operator install it from?"; mechanism answers
+"what failure mode does it catch?"
 
-### Interaction-style branch (6 hooks)
+### Packaging lanes
+
+| Lane | Contract |
+|---|---|
+| Standalone hook repo | Public single-purpose repo with Apache-2.0 license, install docs, settings/plugin metadata, receipts/tests, narrow scope, and allow clauses. |
+| Umbrella-only legacy | Hook remains implemented and wired in this umbrella repo, but no public standalone repo exists yet. These hooks should not be advertised as separately installable until restoration creates the repo, receipts, CI, and metadata. |
+| AgentCloseoutBench physics-backed | Rule-pack-hashed adapters from `waitdeadai/agent-closeout-bench`; they reuse a shared Rust runtime while preserving per-category semantics. Do not duplicate this physics behavior back into standalone Bash hooks. |
+
+### Mechanism branches
+
+#### Interaction-style branch
 
 Catch *how* the model talks: closeout vocabulary, opening vocabulary, time-claim vocabulary, paternalism vocabulary.
 
-| Hook | Failure mode |
-|---|---|
-| no-vibes | false-success closeouts (positive vocabulary without evidence) |
-| time-anchor | training-cutoff confusion (no current-date awareness) |
-| no-curfew | unsolicited rest/wellness paternalism |
-| no-sycophancy | praise-spam at turn open |
-| no-cliffhanger | dangling permission-loop endings |
-| honest-eta | vibe time estimates + linear-scaling claims |
+Examples: `no-vibes`, `time-anchor`, `no-curfew`, `no-sycophancy`,
+`no-cliffhanger`, `no-wrap-up`, `no-tldr-bait`, `honest-eta`.
 
-### Fact-fabrication branch (3 hooks)
+#### Fact-fabrication branch
 
 Catch *what* the model claims: false-memory recall, fabricated stats, fake citations.
 
-| Hook | Failure mode |
-|---|---|
-| no-fake-recall | "as we discussed earlier" without quoted prior content |
-| no-fake-stats | precise percentages / dollar amounts / large counts without source |
-| no-fake-cite | academic citation patterns without verifiable URL |
+Examples: `no-fake-recall`, `no-fake-stats`, `no-fake-cite`,
+`no-phantom-tool-call`, `no-rollback-claim-without-evidence`.
 
-### Continuity branch (1 hook)
+#### Continuity branch
 
 Counters context loss rather than blocking dishonest output.
 
-| Hook | Failure mode |
-|---|---|
-| no-amnesia | context loss after auto-compaction; injects working state on SessionStart |
+Example: `no-amnesia`.
+
+#### Multi-agent orchestration branch
+
+Catches supervisor and parallel-worker rollup failures.
+
+Examples: `no-aggregator-hallucination`, `no-silent-worker-success`,
+`no-cherry-pick-rollup`, `no-ownership-violation`, `no-handoff-loop`.
+
+#### Agentic safety branch
+
+Catches credential leak, sandbagging disguise, and approval-sneak surfaces.
+
+Examples: `no-credential-leak-in-handoff`, `no-sandbagging-disguise`,
+`no-approval-sneak`.
+
+#### Power-user polish branch
+
+Catches frontier-LLM prose defaults that degrade operator trust.
+
+Examples: `no-emoji-spam`, `no-meta-commentary`, `no-prompt-restate`,
+`no-disclaimer-spam`, `no-ai-tells`, `no-roleplay-drift`.
 
 ---
 
@@ -266,7 +292,7 @@ If you build a hook using this methodology, the suite would value a back-link in
 
 ---
 
-## Two Compatible Lanes
+## Three Compatible Lanes
 
 ### Standalone hook lane
 
@@ -281,6 +307,26 @@ Standalone repos must include:
 - reproducible receipts or tests;
 - narrow detection scope;
 - allow clauses for legitimate near misses.
+
+Standalone hooks must not absorb AgentCloseoutBench physics semantics. They can
+link to the physics-backed adapter, but the standalone implementation remains a
+small textual hook unless the repo explicitly changes contract.
+
+### Umbrella-only legacy lane
+
+Umbrella-only legacy hooks are bundled here because the hook exists and is
+useful, but a separate public repo has not been created or restored yet. This
+lane is valid for operators who install the umbrella plugin, but it is not the
+same promise as a standalone repo.
+
+Before promoting one of these hooks to standalone, create or restore:
+
+- public repo and remote;
+- root hook script or intentionally documented multi-file layout;
+- `README.md`, `LICENSE`, `RECEIPTS.md`, and settings example;
+- `.claude-plugin/plugin.json` and `hooks/hooks.json`;
+- CI or fixture command evidence;
+- umbrella table update from "umbrella-only legacy" to standalone repo link.
 
 ### Physics-backed lane
 

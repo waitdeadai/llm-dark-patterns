@@ -1,6 +1,6 @@
 {
   "name": "llm-dark-patterns",
-  "description": "A 10-hook suite that suppresses LLM dark-pattern defaults at the textual boundary. Catches false-success closeouts, training-cutoff confusion, unsolicited paternalism, sycophancy, permission-loops, vibe time estimates, fake recall, fake stats, fake citations, and context loss after auto-compaction. Out-of-band bash judges, model-can't-rewrite. Backed by AbstentionBench, Anthropic's Constitution, AAAI 2026 sycophancy research, and the CoT-faithfulness literature.",
+  "description": "Umbrella plugin for LLM Dark Patterns Hooks: out-of-band Claude Code hook judges that suppress false-success closeouts, training-cutoff confusion, unsolicited paternalism, sycophancy, permission-loops, vibe time estimates, fake recall, fake stats, fake citations, context loss after auto-compaction, multi-agent rollup failures, and power-user polish failures at the textual boundary. Tracks standalone hook repos, umbrella-only legacy hooks, and AgentCloseoutBench physics-backed adapters without collapsing them into one detector.",
   "version": "0.1.0",
   "author": {
     "name": "waitdeadai",

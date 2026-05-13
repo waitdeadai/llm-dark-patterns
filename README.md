@@ -7,12 +7,13 @@
 
 > A suite of single-purpose Claude Code hooks that suppress LLM dark-pattern defaults — sycophancy, paternalism, false-success, permission-loops, training-cutoff confidence, and compaction amnesia — at the textual boundary, so power-user operators can actually work.
 
-This repo is the **umbrella** for a series of small hook repos plus the
-research-grade closeout physics engine in
+This repo is the **umbrella** for a series of small hook repos, umbrella-only
+legacy hooks that still live here, and the research-grade closeout physics
+engine in
 [waitdeadai/agent-closeout-bench](https://github.com/waitdeadai/agent-closeout-bench).
-Each standalone hook remains separately installable. The physics-backed lane
-uses one reproducible engine with per-category rule packs, fixtures, and
-decision JSON.
+Each public standalone hook remains separately installable. The
+physics-backed lane uses one reproducible engine with per-category rule packs,
+fixtures, and decision JSON.
 
 That does not collapse every hook into one generic detector. Each hook maps to
 its own category engine; the shared Rust binary is packaging for reproducible
@@ -66,7 +67,7 @@ See pinned issue [#6 — Field reports](https://github.com/waitdeadai/llm-dark-p
 
 ## The suite
 
-Twenty-eight hooks live as of 2026-05-11, organized in six branches by mechanism:
+The active catalog is organized in six branches by mechanism:
 
 - **Interaction-style** (8): catch *how* the model talks. `no-vibes`, `time-anchor`, `no-curfew`, `no-sycophancy`, `no-cliffhanger`, `no-wrap-up`, `no-tldr-bait`, `honest-eta`.
 - **Fact-fabrication** (5): catch *what* the model claims. `no-fake-recall`, `no-fake-stats`, `no-fake-cite`, `no-phantom-tool-call`, `no-rollback-claim-without-evidence`.
@@ -75,7 +76,17 @@ Twenty-eight hooks live as of 2026-05-11, organized in six branches by mechanism
 - **Agentic safety** (3): catch credential leak, sandbagging disguise, approval-sneak surfaces. `no-credential-leak-in-handoff`, `no-sandbagging-disguise`, `no-approval-sneak`.
 - **Power-user polish** (6): catch frontier-LLM annoyances power users hate. `no-emoji-spam`, `no-meta-commentary`, `no-prompt-restate`, `no-disclaimer-spam`, `no-ai-tells`, `no-roleplay-drift`.
 
-Each is its own repo, single bash file (or bash + python3 for engine-heavier hooks), Apache-2.0, drop-in via `.claude/settings.json`, with reproducible-test receipts.
+The hooks now ship through three distribution lanes:
+
+| Lane | What it means | Examples |
+|---|---|---|
+| Standalone repo | Public single-purpose repo with its own install docs, receipts/tests, and plugin metadata where available. | `no-vibes`, `time-anchor`, `no-curfew`, `no-sycophancy`, `no-cliffhanger`, `honest-eta`, `no-fake-recall`, `no-fake-stats`, `no-fake-cite`, `no-amnesia` |
+| Umbrella-only legacy | Hook implementation exists in this umbrella bundle, but the public standalone repo has not been created or restored yet. Install from this repo's bundled plugin wiring. | `no-wrap-up`, `no-roleplay-drift`, multi-agent rollup hooks, approval/credential/phantom-tool/polish hooks |
+| AgentCloseoutBench physics-backed | Reproducible engine adapters generated from `waitdeadai/agent-closeout-bench`; these are stricter rule-pack lanes, not copies of the standalone Bash scripts. | `no-vibes`, `no-wrap-up`, `no-cliffhanger`, `no-roleplay-drift`, `no-sycophancy` |
+
+Standalone and umbrella-only hooks stay small and inspectable: single bash file
+or bash plus python3 for engine-heavier hooks, Apache-2.0, drop-in via
+`.claude/settings.json`, with reproducible-test receipts or fixtures.
 
 > **See [METHODOLOGY.md](METHODOLOGY.md)** for the harness-engineering playbook used to discover and ship every hook in the suite. Now includes the *Adversarial Discovery via Impossible Tasks* methodology backed by AbstentionBench, Anthropic's tracing-thoughts research, and the CoT-faithfulness literature.
 
@@ -88,7 +99,7 @@ Each is its own repo, single bash file (or bash + python3 for engine-heavier hoo
 | **no-curfew** | unsolicited rest/wellness paternalism | block paternalism vocabulary at turn-end with allow-clause for operator-requested rest content | [waitdeadai/no-curfew](https://github.com/waitdeadai/no-curfew) |
 | **no-sycophancy** | praise-spam at turn-open | inspect first 240 chars; block validation theater | [waitdeadai/no-sycophancy](https://github.com/waitdeadai/no-sycophancy) |
 | **no-cliffhanger** | dangling permission-loop endings | inspect last 320 chars; block "want me to continue?" with allow-clauses for partial-status and explicit choice | [waitdeadai/no-cliffhanger](https://github.com/waitdeadai/no-cliffhanger) |
-| **no-wrap-up** | engagement-fishing closures at message end (DarkBench User Retention) | inspect last 280 chars; block "anything else?" / "let me know if you need anything else" / "hope this helps!" + tail with allow-clause for operator-asked closure | [hooks/no-wrap-up.sh](hooks/no-wrap-up.sh) (umbrella-only) |
+| **no-wrap-up** | engagement-fishing closures at message end (DarkBench User Retention) | inspect last 280 chars; block "anything else?" / "let me know if you need anything else" / "hope this helps!" + tail with allow-clause for operator-asked closure | [hooks/no-wrap-up.sh](hooks/no-wrap-up.sh) (umbrella-only legacy; standalone restoration planned) |
 | **honest-eta** | vibe time estimates + linear-scaling parallelism claims | block time-estimate vocabulary lacking Agent-Native Estimate shape or hedge range; always block linear-scaling | [waitdeadai/honest-eta](https://github.com/waitdeadai/honest-eta) |
 | **no-fake-recall** | false-memory recall ("as we discussed earlier" without quoted prior content) | block recall vocabulary unless message contains a markdown blockquote or 30+ char inline quote | [waitdeadai/no-fake-recall](https://github.com/waitdeadai/no-fake-recall) |
 | **no-fake-stats** | fabricated percentages, dollar amounts, large counts without source | block stat patterns unless message contains URL / "according to <Proper Noun>" / "(YYYY)" / strong neutral hedge | [waitdeadai/no-fake-stats](https://github.com/waitdeadai/no-fake-stats) |
@@ -110,7 +121,7 @@ Each is its own repo, single bash file (or bash + python3 for engine-heavier hoo
 | **no-prompt-restate** | "You asked me to X" / "I understand that you want X" / "So you'd like me to X" preamble waste at message open | inspect first 200 chars for restate openers; allow-clause for explicit operator-asked verification | [hooks/no-prompt-restate.sh](hooks/no-prompt-restate.sh) (umbrella-only) |
 | **no-disclaimer-spam** | "Please note that" / "It's important to mention" / "Keep in mind" defensive padding (paternalism family, Anthropic Constitution) | regex match against disclaimer phrases; fire on any occurrence | [hooks/no-disclaimer-spam.sh](hooks/no-disclaimer-spam.sh) (umbrella-only) |
 | **no-ai-tells** | known LLM-default phrases ("delve into", "tapestry", "navigate the intricacies", "in the realm of", "leverage cutting-edge", etc.) | regex match against canonical AI-tell vocabulary | [hooks/no-ai-tells.sh](hooks/no-ai-tells.sh) (umbrella-only) |
-| **no-roleplay-drift** | "as an AI assistant, I" / "I'm just an AI" / "as a language model" / "I do not have opinions" — model breaking agent character mid-task (DarkBench Anthropomorphism inverse) | regex match against roleplay-break phrases | [hooks/no-roleplay-drift.sh](hooks/no-roleplay-drift.sh) (umbrella-only) |
+| **no-roleplay-drift** | "as an AI assistant, I" / "I'm just an AI" / "as a language model" / "I do not have opinions" — model breaking agent character mid-task (DarkBench Anthropomorphism inverse) | regex match against roleplay-break phrases | [hooks/no-roleplay-drift.sh](hooks/no-roleplay-drift.sh) (umbrella-only legacy; standalone restoration planned) |
 
 ## Loadable packs (operator-extensible without forking)
 
@@ -238,8 +249,8 @@ Honest data: the hooks have a documented vocabulary-distribution gap when applie
 
 ## Install standalone hooks
 
-The standalone repos are still the simplest daily-use path. Install the single
-file hooks:
+The public standalone repos are still the simplest daily-use path. Install the
+single-file hooks that already have standalone repos:
 
 ```bash
 mkdir -p .claude/hooks

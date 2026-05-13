@@ -1,7 +1,7 @@
 # tests/stress — adversarial fixture suite for the hook bundle
 
-168 fixtures covering 10 hooks with positive triggers, false-positive guards,
-and edge cases. Every fixture's expected exit code is verified by
+337 fixtures covering the active hook bundle with positive triggers,
+false-positive guards, and edge cases. Every fixture's expected exit code is verified by
 `tests/stress/run.sh` and reported in `STRESS-REPORT.md`.
 
 ## Layout
