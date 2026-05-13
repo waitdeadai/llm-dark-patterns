@@ -294,11 +294,27 @@ AgentCloseoutBench provides the reproducible engine lane:
 - public-data intake with license and privacy gates;
 - opt-in content-free telemetry commands.
 
+This is a shared runtime, not a generic one-size detector. `no-vibes`,
+`no-wrap-up`, `no-cliffhanger`, `no-roleplay-drift`, and `no-sycophancy` each
+retain their own physics category. They are packaged in one binary so the same
+normalizer, reducer, rule-pack hash, safe-regex lint, result schema, and
+telemetry privacy gate are reused everywhere.
+
 The physics-backed lane lets the same category mechanics serve two jobs:
 
 - daily user protection through Claude Code hook adapters;
 - scientific evaluation through deterministic fixtures, rule-pack hashes, and
   benchmark outputs.
+
+The v0.2 high-assurance boundary adds two operational hardening points:
+
+- adapter env files are allowlist-parsed and never shell-sourced;
+- the installer includes a PreToolUse tamper guard for hook wiring, adapter env,
+  pinned engine, and pinned rule-pack paths.
+
+Those controls reduce accidental or model-driven self-editing inside Claude
+Code. They do not replace file permissions, signed releases, isolated runtime,
+or human review.
 
 ## Current Physics Mapping
 

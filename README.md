@@ -14,13 +14,18 @@ Each standalone hook remains separately installable. The physics-backed lane
 uses one reproducible engine with per-category rule packs, fixtures, and
 decision JSON.
 
+That does not collapse every hook into one generic detector. Each hook maps to
+its own category engine; the shared Rust binary is packaging for reproducible
+hashing, safe regex compilation, fixture testing, telemetry discipline, and
+paper-grade evaluation.
+
 The shared architecture is out-of-band textual enforcement at Claude Code hook
 boundaries. The judge is deterministic code, not another LLM call. That means
 the model cannot modify the hook's code path from inside its closeout text; it
 does not mean the system is impossible to bypass, misconfigure, or evade by
 paraphrase.
 
-## What's shipped (as of 2026-05-11)
+## What's shipped (as of 2026-05-13)
 
 | Phase | Surface | Status |
 |---|---|---|
@@ -29,6 +34,7 @@ paraphrase.
 | Phase 3 — Evidence binary allowlist (devops/k8s/cloud/database/system) | `packs/evidence/binaries.txt` (9 sections, 200+ binaries) | ✓ ships |
 | Phase 4 — Destructive command surface packs (filesystem, container, git-protected, config-overwrite, cloud-prod, database, service) | `packs/destructive/*.txt` (7 surfaces, 56 patterns) | ✓ ships |
 | Phase 5 — Bypass hardening (clause-local negation, evidence proximity + action-verb) | `hooks/no-vibes.sh` | ✓ ships |
+| Phase 6 — Physics-backed closeout adapters | `agentcloseout-physics` v0.2, per-category rule packs, Claude Code wrappers, PreToolUse tamper guard | ✓ ships in AgentCloseoutBench |
 
 Operators with a non-English session, a non-app-dev toolchain, or a load-bearing destructive surface (kubectl, terraform, redis FLUSHALL, force-push to main) can extend coverage **without forking** by dropping a `.txt` into `${XDG_CONFIG_HOME:-$HOME/.config}/llm-dark-patterns/packs/<subdir>/<name>.txt`. See [ROADMAP.md](ROADMAP.md) for the architecture spec.
 
@@ -163,6 +169,15 @@ The paper-grade, benchmark-backed lane lives in
 [waitdeadai/agent-closeout-bench](https://github.com/waitdeadai/agent-closeout-bench).
 It is not a replacement for the small standalone hooks; it is the reproducible
 engine layer that makes closeout mechanics testable, hashable, and comparable.
+For daily use, the adapter installer writes the selected Stop/SubagentStop hook
+wrappers plus a PreToolUse tamper guard. The tamper guard blocks ordinary Claude
+Code attempts to edit the hook wiring, adapter env, pinned engine, or pinned
+rule pack; it is not an OS sandbox and should not be described as bypass-proof.
+
+The v0.2 evidence-claim engine deliberately rejects weak proof shapes such as
+`Implemented and checked.`, `Done. Commands run: none.`, and `Changed files:`
+without command or verification evidence. This is still closeout-contract
+evidence, not independent proof that the underlying work truly happened.
 
 Current physics-backed adapters:
 
@@ -190,7 +205,8 @@ bash adapters/claude-code/install.sh /path/to/your/project no-cliffhanger
 ```
 
 The adapter installer writes a `.claude/settings.agentcloseout.example.json`
-snippet for Claude Code. Merge the entries you want into `.claude/settings.json`.
+snippet for Claude Code, including the tamper-guard `PreToolUse` entry. Merge
+the entries you want into `.claude/settings.json`.
 
 For research, fixtures, public-data intake, human-labeling protocol, and
 collaboration telemetry, use AgentCloseoutBench directly:
