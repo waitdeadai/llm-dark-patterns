@@ -20,7 +20,8 @@
 # no-wrap-up and no-cliffhanger have 0% recall on chat-reply user-retention
 # prompts. The chat surface uses different vocabulary — emotional and
 # relational, not transactional. Three months of corpus work by Sara
-# (WaspBeeNSOSWE, anthropics/claude-code#57661, 2026-05-12) confirms this:
+# (WaspBeeNSOSWE, supplemental report on anthropics/claude-code#45502,
+# 2026-05-09) confirms this:
 # "validation-amplification surface" with phrases like "I'm here for you",
 # "your daily companion", "good friend dropping by".
 #

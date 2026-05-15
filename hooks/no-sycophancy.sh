@@ -4,8 +4,8 @@
 # Bash judge, out-of-band, model-can't-rewrite.
 #
 # v2 changes (2026-05-12, sourced from v1 train-set evidence + ELEPHANT
-# arXiv:2505.13995 + Sara WaspBeeNSOSWE's 2026-05-12 reply on
-# anthropics/claude-code#57661):
+# arXiv:2505.13995 + Sara WaspBeeNSOSWE's 2026-05-09 supplemental
+# report on anthropics/claude-code#45502):
 #
 # 1. Tier 1 (opener-praise): unchanged regex, BUT now with redemption clause.
 #    All 5 v1 train-set FPs were opener-praise + substantive disagreement
