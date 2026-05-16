@@ -3,7 +3,9 @@
 Time anchor: 2026-05-16
 Outer route: `/opussonnet`
 Inner contract: workflow
-Submission portal: `https://clau.de/plugin-directory-submission` (verified 2026-05-16)
+Submission portals (verified 2026-05-16 in Claude Code v2.1.143 plugin docs):
+- Claude.ai: `https://claude.ai/settings/plugins/submit`
+- Console: `https://platform.claude.com/plugins/submit`
 Both targets resolve to one submission; Anthropic routes internally.
 
 ## 1. Problem Statement
@@ -50,7 +52,7 @@ Each criterion is verifiable by a file, command, or external artifact.
 - Bump plugin `version`.
 - Add a marketplace-facing `README.md` excerpt or top-of-README hook (likely the existing README already qualifies; verify).
 - Run the existing `tests` CI on the submission branch to confirm green.
-- Operator submits via the form at `clau.de/plugin-directory-submission`; agent prepares the form-fill content (description, categories, screenshots if available, contact email).
+- Operator submits via the form at the in-app submission form (`claude.ai/settings/plugins/submit` or `platform.claude.com/plugins/submit`); agent prepares the form-fill content (description, categories, screenshots if available, contact email).
 - Log submission in `MARKETPLACE_SUBMISSION_LOG.md`.
 
 ### Out of scope
@@ -107,13 +109,13 @@ Definition of Done:
 
 ### Task 5: Submission form content prep
 Definition of Done:
-- [ ] Draft `SUBMISSION_FORM.md` with the exact text to paste into each field at `clau.de/plugin-directory-submission`.
+- [ ] Draft `SUBMISSION_FORM.md` with the exact text to paste into each field at the in-app submission form (`claude.ai/settings/plugins/submit` or `platform.claude.com/plugins/submit`).
 - [ ] Include a short and long description, categories, keywords, install command, repo URL, contact email.
 - [ ] Include a "Trust posture" paragraph (no MCP, no auto-loading skills, no network, Apache-2.0, deterministic verdicts).
 
 ### Task 6: Operator submission
 Definition of Done:
-- [ ] Operator opens `clau.de/plugin-directory-submission` and pastes the prepared content.
+- [ ] Operator opens the in-app submission form (`claude.ai/settings/plugins/submit` or `platform.claude.com/plugins/submit`) and pastes the prepared content.
 - [ ] Captures the confirmation URL and any reviewer notes.
 - [ ] Pastes them into `MARKETPLACE_SUBMISSION_LOG.md` for the agent to commit.
 

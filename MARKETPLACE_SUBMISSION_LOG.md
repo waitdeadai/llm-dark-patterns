@@ -1,9 +1,19 @@
 # Marketplace Submission Log
 
 Target marketplace: `anthropics/claude-plugins-community` (and follow-up to `claude-plugins-official/external_plugins/`).
-Submission portal: https://clau.de/plugin-directory-submission
+
+Submission portals (verified 2026-05-16 in Claude Code v2.1.143 plugin docs):
+- Claude.ai: https://claude.ai/settings/plugins/submit
+- Console: https://platform.claude.com/plugins/submit
+
+Either form routes to the same Anthropic review pipeline. Pick the account you are logged in to.
+
 Plugin version at submission: `1.0.0`
 Submission branch: `marketplace/submission-1`
+
+Local plugin-load test (2026-05-16, Claude Code v2.1.143):
+- Command: `claude --plugin-dir /home/fer/Documents/llm-dark-patterns -p 'Reply exactly: PLUGIN_LOAD_OK'`
+- Result: `PLUGIN_LOAD_OK`, exit 0. Plugin loads cleanly in a fresh workspace.
 
 ## Submission record
 
