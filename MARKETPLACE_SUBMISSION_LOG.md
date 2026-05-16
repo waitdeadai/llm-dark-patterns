@@ -17,11 +17,18 @@ Local plugin-load test (2026-05-16, Claude Code v2.1.143):
 
 ## Submission record
 
-- **Status**: NOT YET SUBMITTED
+### v0.1.0 (original, 2026-05-11)
+- **Status (dashboard)**: Published as of 2026-05-11
+- **Status (live marketplace.json)**: NOT LISTED — verified 2026-05-16 against `https://raw.githubusercontent.com/anthropics/claude-plugins-community/main/.claude-plugin/marketplace.json` (1715 plugins; zero `waitdeadai` source matches; zero `llm-dark-patterns` name matches).
+- **Anthropic-side tracking issue**: `anthropics/claude-plugins-official#1887` (opened 2026-05-16, follow-up to closed #1272).
+- **End-user effect**: `claude plugin install llm-dark-patterns@claude-community` does not resolve.
+
+### v1.0.0 (planned resubmit, 2026-05-16)
+- **Status**: NOT YET SUBMITTED (pending operator action via in-app form)
 - **Submission timestamp (UTC)**: TBD
 - **Confirmation URL or ID**: TBD
 - **Reviewer notes (if any)**: TBD
-- **plugin.json commit at submit time**: TBD
+- **plugin.json commit at submit time**: `46f2d77` plus subsequent edits on `marketplace/submission-1` (latest HEAD will be captured at submit time).
 
 ## Pre-flight (operator runs before submit)
 
