@@ -40,6 +40,43 @@ if ! printf '%s' "$INPUT" | jq -e . >/dev/null 2>&1; then
   exit 0
 fi
 
+# Rust path: prefer agentcloseout-physics when available.
+if command -v agentcloseout-physics >/dev/null 2>&1; then
+  RULES_DIR="${LLM_DARK_PATTERNS_RULES_DIR:-}"
+  if [ -z "$RULES_DIR" ]; then
+    for candidate in \
+      "$(dirname "$0")/../../agent-closeout-bench/rules/closeout" \
+      "/home/fer/Documents/agent-closeout-bench/rules/closeout" \
+      "${XDG_CONFIG_HOME:-$HOME/.config}/agentcloseout-physics/rules/closeout"; do
+      if [ -d "$candidate" ]; then RULES_DIR="$candidate"; break; fi
+    done
+  fi
+  if [ -n "$RULES_DIR" ] && [ -d "$RULES_DIR" ] && [ -f "$RULES_DIR/no_curfew.yaml" ]; then
+    TMP_INPUT="$(mktemp)"; printf '%s' "$INPUT" > "$TMP_INPUT"
+    VERDICT_JSON="$(agentcloseout-physics scan --category no_curfew --rules "$RULES_DIR" --input "$TMP_INPUT" 2>/dev/null || true)"
+    rm -f "$TMP_INPUT"
+    if [ -n "$VERDICT_JSON" ]; then
+      DECISION="$(printf '%s' "$VERDICT_JSON" | jq -r '.decision // empty' 2>/dev/null)"
+      if [ "$DECISION" = "block" ]; then
+        RULE="$(printf '%s' "$VERDICT_JSON" | jq -r '.matched_rules[0].rule_id // "no_curfew"' 2>/dev/null)"
+        EVIDENCE="$(printf '%s' "$VERDICT_JSON" | jq -r '.redacted_evidence[0] // ""' 2>/dev/null)"
+        echo "BLOCKED: unsolicited rest/wellness paternalism in agent-mode session." >&2
+        echo "Matched rule: $RULE" >&2
+        [ -n "$EVIDENCE" ] && echo "Evidence: $EVIDENCE" >&2
+        echo "" >&2
+        echo "Repair guidance:" >&2
+        echo "- Drop the human-rest framing. Continue with the next concrete piece of work." >&2
+        echo "- If the operator did request rest advice, restate the operator's request so the allow-clause matches." >&2
+        echo "- Anthropic's Constitution: paternalism and moralizing are disrespectful when unsolicited." >&2
+        exit 2
+      fi
+      if [ "$DECISION" = "pass" ]; then
+        exit 0
+      fi
+    fi
+  fi
+fi
+
 json_get() {
   local filter="$1"
   printf '%s' "$INPUT" | jq -r "$filter // empty" 2>/dev/null || true
