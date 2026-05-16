@@ -18,6 +18,44 @@ if ! printf '%s' "$INPUT" | jq -e . >/dev/null 2>&1; then
   exit 0
 fi
 
+# Rust path: only for Stop/SubagentStop. TaskCreated stays on bash path
+# (the Rust v0.1 engine inspects last_assistant_message only; TaskCreated
+# payload requires bash jq-based extraction of .task.description / .task.prompt).
+EVENT_FILTER="$(printf '%s' "$INPUT" | jq -r '.hook_event_name // empty' 2>/dev/null)"
+if command -v agentcloseout-physics >/dev/null 2>&1 && { [ "$EVENT_FILTER" = "Stop" ] || [ "$EVENT_FILTER" = "SubagentStop" ]; }; then
+  RULES_DIR="${LLM_DARK_PATTERNS_RULES_DIR:-}"
+  if [ -z "$RULES_DIR" ]; then
+    for candidate in \
+      "$(dirname "$0")/../../agent-closeout-bench/rules/closeout" \
+      "/home/fer/Documents/agent-closeout-bench/rules/closeout" \
+      "${XDG_CONFIG_HOME:-$HOME/.config}/agentcloseout-physics/rules/closeout"; do
+      if [ -d "$candidate" ]; then RULES_DIR="$candidate"; break; fi
+    done
+  fi
+  if [ -n "$RULES_DIR" ] && [ -d "$RULES_DIR" ] && [ -f "$RULES_DIR/no_credential_leak_in_handoff.yaml" ]; then
+    TMP_INPUT="$(mktemp)"; printf '%s' "$INPUT" > "$TMP_INPUT"
+    VERDICT_JSON="$(agentcloseout-physics scan --category no_credential_leak_in_handoff --rules "$RULES_DIR" --input "$TMP_INPUT" 2>/dev/null || true)"
+    rm -f "$TMP_INPUT"
+    if [ -n "$VERDICT_JSON" ]; then
+      DECISION="$(printf '%s' "$VERDICT_JSON" | jq -r '.decision // empty' 2>/dev/null)"
+      if [ "$DECISION" = "block" ]; then
+        RULE="$(printf '%s' "$VERDICT_JSON" | jq -r '.matched_rules[0].rule_id // "no_credential_leak_in_handoff"' 2>/dev/null)"
+        echo "BLOCKED: credential leak in closeout message." >&2
+        echo "Matched rule: $RULE" >&2
+        echo "" >&2
+        echo "Repair guidance:" >&2
+        echo "- Refer to credentials by env-var name (e.g. \$ANTHROPIC_API_KEY) instead of inlining the value." >&2
+        echo "- Or have the subagent read from a secrets manager." >&2
+        echo "- Reference: arXiv:2602.11510 AgentLeak benchmark." >&2
+        exit 2
+      fi
+      if [ "$DECISION" = "pass" ]; then
+        exit 0
+      fi
+    fi
+  fi
+fi
+
 json_get() { printf '%s' "$INPUT" | jq -r "$1 // empty" 2>/dev/null || true; }
 
 block() {
