@@ -23,12 +23,15 @@ Local plugin-load test (2026-05-16, Claude Code v2.1.143):
 - **Anthropic-side tracking issue**: `anthropics/claude-plugins-official#1887` (opened 2026-05-16, follow-up to closed #1272).
 - **End-user effect**: `claude plugin install llm-dark-patterns@claude-community` does not resolve.
 
-### v1.0.0 (planned resubmit, 2026-05-16)
-- **Status**: NOT YET SUBMITTED (pending operator action via in-app form)
-- **Submission timestamp (UTC)**: TBD
-- **Confirmation URL or ID**: TBD
+### v1.0.0 resubmit (2026-05-16T14:14-03:00 / 17:14 UTC)
+- **Status**: SUBMITTED, awaiting Anthropic-side processing
+- **Submission timestamp (UTC)**: 2026-05-16T17:14:42Z
+- **Form**: in-app via `claude.ai/settings/plugins/submit` or `platform.claude.com/plugins/submit`
+- **Confirmation URL or ID**: TBD (operator to paste)
 - **Reviewer notes (if any)**: TBD
-- **plugin.json commit at submit time**: `46f2d77` plus subsequent edits on `marketplace/submission-1` (latest HEAD will be captured at submit time).
+- **plugin.json commit at submit time**: `77401e2` on `waitdeadai/llm-dark-patterns:main` (v1.0.0, post PR #10 merge)
+- **Privacy policy URL given**: `https://github.com/waitdeadai/llm-dark-patterns/blob/main/PRIVACY.md`
+- **Platforms claimed**: Claude Code (verified via local `claude --plugin-dir` install + `claude plugin marketplace add waitdeadai/claude-plugins` install)
 
 ## Pre-flight (operator runs before submit)
 
