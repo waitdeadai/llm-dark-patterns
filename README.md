@@ -282,6 +282,22 @@ The hooks are **conservative on purpose** — they would rather false-positive o
 
 Important clarification: this suite **does not** suppress safety refusals, content-policy enforcement, or harm-prevention. The regexes are narrow to specific interaction-style defaults (sycophancy, paternalism, false-completion, permission-spam). If you want a tool that bypasses Claude's safety behaviors, this is not it.
 
+## Threat model
+
+This suite catches specific textual signatures at the Claude Code stop and sub-agent-stop lifecycle hooks. It is not a sandbox, a refusal layer, or a prompt-injection defence. Operators considering this for safety-critical workflows should read the failure modes below before relying on it.
+
+1. **Lexical evasion.** The hooks are deterministic and rule-based. Paraphrase, synonym substitution, and reordering can defeat any single rule. The companion benchmark [`agent-closeout-bench`](https://github.com/waitdeadai/agent-closeout-bench) is the surface where this brittleness is measured rather than hidden.
+
+2. **Hook misconfiguration.** The runtime requires correctly wired Claude Code hook entries in `.claude/settings.json`. A disabled hook, a typo in the hook command, or a workflow that bypasses `Stop` entirely produces a silent miss. The hook cannot detect that it was never invoked.
+
+3. **Runtime bypass.** A local operator with shell access can disable hooks at any time, or pipe the hook output to `true`. This is a deterministic verdict layer, not an operating-system sandbox. Threats from a hostile operator on the same host are out of scope.
+
+4. **In-band manipulation.** Hook decision logic runs out-of-band relative to the model that produced the closeout, so the model cannot directly rewrite the verdict. The model can, however, be coerced by an upstream prompt to phrase a false closeout in language the rules do not catch. *Out-of-band* means the verdict path is independent of the model context, not that the closeout text is unmanipulable.
+
+5. **Evidence-marker limitations.** Several hooks treat tokens such as ``verification passed`` or ``tests pass`` as closeout-contract evidence that mitigates other dark-pattern signals. These markers establish that the closeout contract was honoured in form; they are not independent proof that the underlying verification command actually succeeded. A workflow that wants stronger guarantees should record verifier outputs separately and treat closeout text as one of several signals.
+
+6. **Coverage and language scope.** Rules are English-only. The lifecycle surface is the Claude Code `Stop` and `SubagentStop` hook payload; behaviour on other agent frameworks is undefined.
+
 ## Parent harness
 
 Hooks were extracted from the [minmaxing](https://github.com/waitdeadai/minmaxing) governance harness, which uses the same patterns at higher level (workflow contracts, spec-first, agent-native estimation, /agentfactory).
