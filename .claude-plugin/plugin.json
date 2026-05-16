@@ -1,7 +1,7 @@
 {
   "name": "llm-dark-patterns",
-  "description": "Umbrella plugin for LLM Dark Patterns Hooks: out-of-band Claude Code hook judges that suppress false-success closeouts, training-cutoff confusion, unsolicited paternalism, sycophancy, permission-loops, vibe time estimates, fake recall, fake stats, fake citations, context loss after auto-compaction, multi-agent rollup failures, and power-user polish failures at the textual boundary. Tracks standalone hook repos, umbrella-only legacy hooks, and AgentCloseoutBench physics-backed adapters without collapsing them into one detector.",
-  "version": "0.1.0",
+  "description": "Out-of-band Claude Code Stop / SubagentStop hook judges that block 28 LLM dark patterns at the closeout boundary: false-success without evidence, sycophancy, paternalism, permission-loops, vibe time estimates, fake recall, fake stats, fake citations, context loss after compaction, multi-agent rollup failures, and power-user polish failures. Deterministic verdicts, no network calls, no model in the verdict path, Apache-2.0, paper-grade claim ledger.",
+  "version": "1.0.0",
   "author": {
     "name": "waitdeadai",
     "url": "https://github.com/waitdeadai"
@@ -9,6 +9,14 @@
   "homepage": "https://github.com/waitdeadai/llm-dark-patterns",
   "repository": "https://github.com/waitdeadai/llm-dark-patterns",
   "license": "Apache-2.0",
+  "category": "security",
+  "tags": [
+    "safety",
+    "governance",
+    "hooks",
+    "stop-hooks",
+    "ai-safety"
+  ],
   "keywords": [
     "claude-code",
     "hooks",
