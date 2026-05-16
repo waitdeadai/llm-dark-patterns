@@ -247,16 +247,22 @@ Hooks tested as black-box text classifiers against the same corpus: best F1 was 
 
 Honest data: the hooks have a documented vocabulary-distribution gap when applied to chat-reply text vs the Claude Code closeout text they were designed for. Reproducible end-to-end (~$12 PAYG-equiv, ~3 hours sequential). [Full results, methodology, limitations, and observation-only failure analysis →](evaluation/RESULTS.md)
 
-## Install via Anthropic plugin marketplace (recommended)
-
-If your Claude Code build has plugin support, install the bundled suite directly from the community marketplace:
+## Install (recommended): self-hosted marketplace
 
 ```bash
-claude plugin marketplace add anthropics/claude-plugins-community
-claude plugin install llm-dark-patterns@claude-community
+claude plugin marketplace add waitdeadai/claude-plugins
+claude plugin install llm-dark-patterns@waitdeadai-plugins
 ```
 
 This installs all 31 wired hooks across `Stop`, `SubagentStop`, `TaskCreated`, `TaskCompleted`, `PreToolUse`, `PostToolUse`, `PreCompact`, `PostCompact`, and `SessionStart` events. Each hook remains independently disablable by editing `hooks.json` after install.
+
+The self-hosted marketplace at [`waitdeadai/claude-plugins`](https://github.com/waitdeadai/claude-plugins) exists because the Anthropic community marketplace pipeline is currently dropping submissions: this plugin shows as **Published** in the submissions dashboard since 2026-05-11 but does not appear in the live `claude-plugins-community/marketplace.json` (verified 2026-05-16, zero matches across 1715 entries). Tracking issues: [anthropics/claude-plugins-official#1887](https://github.com/anthropics/claude-plugins-official/issues/1887), [#1272](https://github.com/anthropics/claude-plugins-official/issues/1272), [#984](https://github.com/anthropics/claude-plugins-official/issues/984). Once Anthropic's pipeline catches up, the community-marketplace path will also work as a fallback:
+
+```bash
+# Fallback (currently does not resolve; pending #1887)
+claude plugin marketplace add anthropics/claude-plugins-community
+claude plugin install llm-dark-patterns@claude-community
+```
 
 ## Install standalone hooks
 
