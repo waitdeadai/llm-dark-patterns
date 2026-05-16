@@ -48,3 +48,14 @@ Two reasons to post:
 2. The "right channel" question is unanswered and worth surfacing publicly.
 
 Your call. If you want a more concise version, tell me and I'll trim.
+
+---
+
+## Posted record (2026-05-16T17:56Z)
+
+- **#1887 reply**: https://github.com/anthropics/claude-plugins-official/issues/1887#issuecomment-4467680705
+- **#1272 comment**: https://github.com/anthropics/claude-plugins-official/issues/1272#issuecomment-4467681414
+- **Awesome-list PR #224 body updated** (webfuse-com/awesome-claude): https://github.com/webfuse-com/awesome-claude/pull/224
+- **Awesome-list PR #43 body updated** (jmanhype/awesome-claude-code): https://github.com/jmanhype/awesome-claude-code/pull/43
+
+Both comments lead with the systemic-pattern data, surface the self-hosted-marketplace workaround for affected publishers, and politely ask for the right triage channel. The marketplace-eventually-processes finding from the live data is included so other affected publishers can self-diagnose.
