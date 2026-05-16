@@ -247,10 +247,20 @@ Hooks tested as black-box text classifiers against the same corpus: best F1 was 
 
 Honest data: the hooks have a documented vocabulary-distribution gap when applied to chat-reply text vs the Claude Code closeout text they were designed for. Reproducible end-to-end (~$12 PAYG-equiv, ~3 hours sequential). [Full results, methodology, limitations, and observation-only failure analysis →](evaluation/RESULTS.md)
 
+## Install via Anthropic plugin marketplace (recommended)
+
+If your Claude Code build has plugin support, install the bundled suite directly from the community marketplace:
+
+```bash
+claude plugin marketplace add anthropics/claude-plugins-community
+claude plugin install llm-dark-patterns@claude-community
+```
+
+This installs all 31 wired hooks across `Stop`, `SubagentStop`, `TaskCreated`, `TaskCompleted`, `PreToolUse`, `PostToolUse`, `PreCompact`, `PostCompact`, and `SessionStart` events. Each hook remains independently disablable by editing `hooks.json` after install.
+
 ## Install standalone hooks
 
-The public standalone repos are still the simplest daily-use path. Install the
-single-file hooks that already have standalone repos:
+The public standalone repos are still the simplest daily-use path when you want a subset rather than the whole suite. Install the single-file hooks that already have standalone repos:
 
 ```bash
 mkdir -p .claude/hooks
