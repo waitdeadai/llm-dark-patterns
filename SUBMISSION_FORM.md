@@ -24,16 +24,20 @@ The plugin loads cleanly in a fresh workspace via the documented `--plugin-dir` 
 
 ---
 
+## Resubmission context (2026-05-16)
+
+This is a **v1.0.0 update resubmission** of a plugin that shows status `Published` in the submissions dashboard as of 2026-05-11, but is not present in the live `anthropics/claude-plugins-community/.claude-plugin/marketplace.json` (1715 entries scanned 2026-05-16; zero matches for `waitdeadai` source URLs). Tracking issue: `anthropics/claude-plugins-official#1887`. The v1.0.0 expands from 10 wired hooks to 31 wired hooks across 9 lifecycle events. If the form has an "update existing listing" mode that recognises the prior submission, use it; otherwise resubmit as a fresh entry and the dashboard will surface the relationship.
+
 ## Plugin name
 `llm-dark-patterns`
 
 ## Short description (single sentence, ~140 chars)
-Out-of-band Claude Code hook judges that block 28 LLM dark patterns at the Stop / SubagentStop closeout boundary. Deterministic, Apache-2.0.
+v1.0.0 update — 31-hook out-of-band suite that blocks LLM dark-pattern closeouts at Claude Code Stop / SubagentStop. Deterministic, Apache-2.0.
 
 ## Long description (1-3 paragraphs)
-LLM Dark Patterns Hooks is a suite of single-purpose Claude Code hooks that suppress LLM dark-pattern defaults at the textual boundary where the assistant claims it is done. The hooks fire at `Stop`, `SubagentStop`, `TaskCreated`, `TaskCompleted`, `PreToolUse`, `PostToolUse`, `PreCompact`, `PostCompact`, and `SessionStart` events.
+LLM Dark Patterns Hooks is a suite of single-purpose Claude Code hooks that suppress LLM dark-pattern defaults at the textual boundary where the assistant claims it is done. v1.0.0 expands the previously listed 10-hook surface to 31 wired hooks across nine lifecycle events: `Stop`, `SubagentStop`, `TaskCreated`, `TaskCompleted`, `PreToolUse`, `PostToolUse`, `PreCompact`, `PostCompact`, and `SessionStart`.
 
-The hooks catch failure modes that the academic dark-patterns literature has measured but that no in-context system prompt can reliably suppress: false-success closeouts without evidence, sycophancy, paternalism, permission-loops, vibe time estimates, fake recall, fake stats, fake citations, context loss after compaction, multi-agent rollup hallucinations, role-play drift, emoji spam, and power-user polish defaults. Each hook is deterministic regex over the closeout text; no model participates in the verdict path, so the same model that produced the dishonest closeout cannot override the verdict.
+The hooks catch failure modes that the academic dark-patterns literature has measured but that no in-context system prompt can reliably suppress: false-success closeouts without evidence, sycophancy, paternalism, permission-loops, vibe time estimates, fake recall, fake stats, fake citations, context loss after compaction, multi-agent rollup hallucinations, role-play drift, emoji spam, and power-user polish defaults. Each hook is a deterministic regex pass over the closeout text; no model participates in the verdict path, so the same model that produced the dishonest closeout cannot override the verdict.
 
 The suite is paper-grade in design: an Apache-2.0 reference engine (`agent-closeout-bench`), a public claim ledger that codifies which claims are forbidden, an explicit threat model in the README (lexical evasion, hook misconfiguration, runtime bypass, in-band manipulation, evidence-marker limitations, language scope), and a public companion benchmark currently in workshop-paper submission. This is not a jailbreak; it does not suppress safety refusals or content-policy enforcement. It suppresses interaction-style dishonesty defaults that are orthogonal to refusal robustness.
 
