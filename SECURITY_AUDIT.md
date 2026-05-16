@@ -59,6 +59,20 @@ None of these are compliance blockers; they are defensive notes the reviewer may
 
 All 31 wired hooks pass the security guidance compliance bar for marketplace submission. No hook has been flagged for removal from the bundle.
 
+## Local load verification (2026-05-16, Claude Code v2.1.143)
+
+Per the documented testing pattern at https://code.claude.com/docs/en/plugins ("Test your plugins locally"), the plugin was loaded into a fresh workspace via `--plugin-dir`:
+
+```bash
+mkdir -p /tmp/plugin-test-$$ && cd /tmp/plugin-test-$$
+claude --plugin-dir /home/fer/Documents/llm-dark-patterns \
+       -p 'Reply exactly: PLUGIN_LOAD_OK'
+# stdout: PLUGIN_LOAD_OK
+# exit 0
+```
+
+The plugin loaded cleanly with no error, no security warning, and no permission prompt blocking execution. This is the closest pre-submission load-shape check available outside the marketplace review pipeline.
+
 ## Cross-references
 
 - `hooks/hooks.json` — canonical wiring list

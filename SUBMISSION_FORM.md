@@ -1,9 +1,26 @@
-# Submission Form Content — clau.de/plugin-directory-submission
+# Submission Form Content — Anthropic plugin marketplace
 
-Prepared for operator to paste into the Anthropic plugin marketplace submission form at https://clau.de/plugin-directory-submission.
+Prepared for operator to paste into one of the in-app submission forms (verified live in Claude Code v2.1.143 docs at https://code.claude.com/docs/en/plugins, 2026-05-16):
+
+- **Claude.ai**: https://claude.ai/settings/plugins/submit
+- **Console**: https://platform.claude.com/plugins/submit
+
+Both forms route into the same Anthropic internal review pipeline. Pick whichever account you are already logged in to.
 
 Submission timestamp: TBD (filled by operator after submit).
-Submission version: plugin.json `version` = `1.0.0` on branch `marketplace/submission-1` at commit TBD.
+Submission version: plugin.json `version` = `1.0.0` on branch `marketplace/submission-1`.
+
+Local plugin-load evidence (run 2026-05-16, Claude Code v2.1.143):
+
+```
+mkdir -p /tmp/plugin-test-$$ && cd /tmp/plugin-test-$$ && \
+  claude --plugin-dir /home/fer/Documents/llm-dark-patterns \
+         -p 'Reply exactly: PLUGIN_LOAD_OK'
+# stdout: PLUGIN_LOAD_OK
+# exit 0
+```
+
+The plugin loads cleanly in a fresh workspace via the documented `--plugin-dir` flag.
 
 ---
 
