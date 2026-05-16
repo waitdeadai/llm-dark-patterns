@@ -1,5 +1,20 @@
 # Submission Form Content — Anthropic plugin marketplace
 
+## STATUS: SUPERSEDED 2026-05-16
+
+This file is preserved for historical reference. The plugin is distributed via the self-hosted marketplace at `https://github.com/waitdeadai/claude-plugins` (Apache-2.0). Users install with:
+
+```bash
+claude plugin marketplace add waitdeadai/claude-plugins
+claude plugin install llm-dark-patterns@waitdeadai-plugins
+```
+
+End-to-end install verified 2026-05-16. The community-marketplace submission flow at `claude.ai/settings/plugins/submit` is broken Anthropic-side for many submitters (tracking issues `#1272`, `#984`, `#1292`, `#1597`, `#1887`). Re-submission via the in-app form is deferred until Anthropic resolves the pipeline gap.
+
+The form content below remains the prepared paste-ready text if/when re-submission is attempted.
+
+---
+
 Prepared for operator to paste into one of the in-app submission forms (verified live in Claude Code v2.1.143 docs at https://code.claude.com/docs/en/plugins, 2026-05-16):
 
 - **Claude.ai**: https://claude.ai/settings/plugins/submit
@@ -8,7 +23,7 @@ Prepared for operator to paste into one of the in-app submission forms (verified
 Both forms route into the same Anthropic internal review pipeline. Pick whichever account you are already logged in to.
 
 Submission timestamp: TBD (filled by operator after submit).
-Submission version: plugin.json `version` = `1.0.0` on branch `marketplace/submission-1`.
+Submission version: plugin.json `version` = `1.0.0` on `main` (post-merge of PR #10).
 
 Local plugin-load evidence (run 2026-05-16, Claude Code v2.1.143):
 
