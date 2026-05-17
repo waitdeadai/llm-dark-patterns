@@ -239,6 +239,23 @@ Every hook in the suite follows the same 4-step design:
 
 This pattern composes. If you find a sixth dark pattern with a clean textual signature, write `no-X.sh` in 50–100 lines of bash and ship it as a sister repo. If you publish it under the same conventions (Apache-2.0, single file, `RECEIPTS.md` with reproducible fixtures, sister-tools cross-link block), open a PR adding it to the table above.
 
+### Where this fits in the LLM safety stack
+
+This suite is **orthogonal**, not competitive, to the established LLM safety tools. Each operates at a different boundary:
+
+| Layer | Tool | Catches | Operates at |
+|---|---|---|---|
+| Input firewall | [Lakera Guard](https://www.lakera.ai/), [LLM Guard (ProtectAI)](https://github.com/protectai/llm-guard), [Pangea](https://pangea.cloud/) | Prompt injection, jailbreak, PII in input | LLM API request boundary |
+| Conversational rails | [NVIDIA NeMo Guardrails](https://github.com/NVIDIA-NeMo/Guardrails) | Topic control, dialog flow, fact-check, jailbreak | Inline middleware, programmable Colang DSL |
+| Agent runtime policy | [AgentSpec (Wang et al., ICSE '26)](https://arxiv.org/abs/2503.18666), [Pro²Guard (arXiv 2508.00500)](https://arxiv.org/abs/2508.00500) | Code execution safety, embodied agent safety, AV compliance | Agent tool-call boundary, DSL-defined triggers/predicates |
+| Output content scanning | [LLM Guard output scanners](https://github.com/protectai/llm-guard) (35 scanners) | Toxicity, PII, gibberish, factual consistency, bias, code injection | LLM response boundary |
+| Behavioral benchmarks (not enforcement) | [DarkBench (Kran et al., ICLR '25)](https://arxiv.org/abs/2503.10728), [DarkPatterns-LLM (arXiv 2512.22470)](https://arxiv.org/abs/2512.22470) | Six dark-pattern categories (sycophancy, anthropomorphism, sneaking, brand bias, retention, harmful gen) | Offline evaluation corpora |
+| **This suite** | **`llm-dark-patterns`** | **Dark-pattern *closeout-boundary enforcement*: sycophancy, false-success, permission loops, paternalism, training-cutoff confidence, compaction amnesia, and the Slice 2-5 fact-fabrication / interaction-style / multi-agent / residual families** | **Claude Code `Stop` / `SubagentStop` / `TaskCreated` / `TaskCompleted` / `PreToolUse` / `PostToolUse` / `PreCompact` / `PostCompact` / `SessionStart` hook events** |
+
+The intersection of **dark-pattern detection + runtime enforcement at the agent loop boundary** is the slot this suite occupies. The enforcement-side peers (Lakera, NeMo, LLM Guard, AgentSpec) currently have approximately zero dark-pattern coverage; the dark-pattern-side peers (DarkBench, DarkPatterns-LLM) are detection corpora with no runtime enforcement.
+
+You can run this suite *alongside* any of the input-firewall / conversational-rails / output-scanning layers — they operate at different boundaries and don't conflict. Pairing with the deterministic floor + LLM ceiling pattern (2026 production best-practice: deterministic checks first, LLM judge for ambiguous cases) is also straightforward — the hooks' `BLOCKED` decisions are the deterministic floor, and an out-of-band LLM judge can be wired as a separate hook for cases the regex doesn't catch.
+
 ### Empirical evaluation against DarkBench
 
 Re-ran [DarkBench](https://github.com/apartresearch/darkbench) (Kran et al., ICLR 2025, [arXiv:2503.10728](https://arxiv.org/abs/2503.10728)) against `claude-sonnet-4-6` in 2026-05. **Sycophancy prevalence dropped from 13% in the paper's 14-model 2025 average to 1.8% on Sonnet 4.6 alone** — RLHF appears to have measurably reduced the canonical sycophancy surface in the year between studies. Anthropomorphization (62%) and user-retention (79%) prevalence remain high.
