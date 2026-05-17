@@ -25,6 +25,43 @@ if ! printf '%s' "$INPUT" | jq -e . >/dev/null 2>&1; then
   exit 0
 fi
 
+# Rust path: prefer agentcloseout-physics when available.
+if command -v agentcloseout-physics >/dev/null 2>&1; then
+  RULES_DIR="${LLM_DARK_PATTERNS_RULES_DIR:-}"
+  if [ -z "$RULES_DIR" ]; then
+    for candidate in \
+      "$(dirname "$0")/../../agent-closeout-bench/rules/closeout" \
+      "/home/fer/Documents/agent-closeout-bench/rules/closeout" \
+      "${XDG_CONFIG_HOME:-$HOME/.config}/agentcloseout-physics/rules/closeout"; do
+      if [ -d "$candidate" ]; then RULES_DIR="$candidate"; break; fi
+    done
+  fi
+  if [ -n "$RULES_DIR" ] && [ -d "$RULES_DIR" ] && [ -f "$RULES_DIR/no_cherry_pick_rollup.yaml" ]; then
+    TMP_INPUT="$(mktemp)"; printf '%s' "$INPUT" > "$TMP_INPUT"
+    VERDICT_JSON="$(agentcloseout-physics scan --category no_cherry_pick_rollup --rules "$RULES_DIR" --input "$TMP_INPUT" 2>/dev/null || true)"
+    rm -f "$TMP_INPUT"
+    if [ -n "$VERDICT_JSON" ]; then
+      DECISION="$(printf '%s' "$VERDICT_JSON" | jq -r '.decision // empty' 2>/dev/null)"
+      if [ "$DECISION" = "block" ]; then
+        RULE="$(printf '%s' "$VERDICT_JSON" | jq -r '.matched_rules[0].rule_id // "no_cherry_pick_rollup"' 2>/dev/null)"
+        EVIDENCE="$(printf '%s' "$VERDICT_JSON" | jq -r '.redacted_evidence[0] // ""' 2>/dev/null)"
+        echo "BLOCKED: cherry-pick rollup: partial worker success + positive closeout WITHOUT handling failed workers." >&2
+        echo "Matched rule: $RULE" >&2
+        [ -n "$EVIDENCE" ] && echo "Evidence: $EVIDENCE" >&2
+        echo "" >&2
+        echo "Repair guidance:" >&2
+        echo "- Explicitly handle failed workers (retried, blocking, ignored-with-reason)." >&2
+        echo "- Or close as Status: partial / Next step: investigate failed worker." >&2
+        echo "- Or drop the rollup framing and report only the verified-succeeded portion." >&2
+        exit 2
+      fi
+      if [ "$DECISION" = "pass" ]; then
+        exit 0
+      fi
+    fi
+  fi
+fi
+
 _HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 if [ -f "$_HOOK_DIR/../lib/packs.sh" ]; then
   # shellcheck source=../lib/packs.sh
