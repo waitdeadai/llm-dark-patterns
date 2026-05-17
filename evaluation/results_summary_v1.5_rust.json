@@ -1,0 +1,131 @@
+{
+  "total_rows": 330,
+  "usable_rows": 327,
+  "excluded_rows": 3,
+  "rescore_meta": {
+    "engine": "/home/fer/Documents/agent-closeout-bench/engine/target/release/agentcloseout-physics",
+    "engine_sha256": "ffe3c4e5dce01505e3417ba4941b23e1be2c39cb8154d966b8354b4e7189ac13",
+    "rules_dir": "/home/fer/Documents/agent-closeout-bench/rules/closeout",
+    "rule_pack_hash": "26fa8fd9999c055dcd93e30b40c1bd60ddce52f8b1b2bd697b63874dedb35995"
+  },
+  "categories": {
+    "anthropomorphization": {
+      "n": 109,
+      "label_positive_count": 67,
+      "label_positive_rate": 0.6146788990825688
+    },
+    "sycophancy": {
+      "n": 110,
+      "label_positive_count": 2,
+      "label_positive_rate": 0.01818181818181818
+    },
+    "user-retention": {
+      "n": 108,
+      "label_positive_count": 85,
+      "label_positive_rate": 0.7870370370370371
+    }
+  },
+  "hooks": {
+    "no-sycophancy": {
+      "category": "sycophancy",
+      "bash": {
+        "n": 110,
+        "tp": 0,
+        "fp": 5,
+        "fn": 2,
+        "tn": 103,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": null,
+        "label_positive_rate": 0.01818181818181818
+      },
+      "rust": {
+        "n": 110,
+        "tp": 0,
+        "fp": 5,
+        "fn": 2,
+        "tn": 103,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": null,
+        "label_positive_rate": 0.01818181818181818
+      }
+    },
+    "no-wrap-up": {
+      "category": "user-retention",
+      "bash": {
+        "n": 108,
+        "tp": 0,
+        "fp": 0,
+        "fn": 85,
+        "tn": 23,
+        "precision": null,
+        "recall": 0.0,
+        "f1": null,
+        "label_positive_rate": 0.7870370370370371
+      },
+      "rust": {
+        "n": 108,
+        "tp": 0,
+        "fp": 0,
+        "fn": 85,
+        "tn": 23,
+        "precision": null,
+        "recall": 0.0,
+        "f1": null,
+        "label_positive_rate": 0.7870370370370371
+      }
+    },
+    "no-cliffhanger": {
+      "category": "user-retention",
+      "bash": {
+        "n": 108,
+        "tp": 1,
+        "fp": 0,
+        "fn": 84,
+        "tn": 23,
+        "precision": 1.0,
+        "recall": 0.011764705882352941,
+        "f1": 0.023255813953488372,
+        "label_positive_rate": 0.7870370370370371
+      },
+      "rust": {
+        "n": 108,
+        "tp": 1,
+        "fp": 0,
+        "fn": 84,
+        "tn": 23,
+        "precision": 1.0,
+        "recall": 0.011764705882352941,
+        "f1": 0.023255813953488372,
+        "label_positive_rate": 0.7870370370370371
+      }
+    },
+    "no-roleplay-drift": {
+      "category": "anthropomorphization",
+      "bash": {
+        "n": 109,
+        "tp": 7,
+        "fp": 12,
+        "fn": 60,
+        "tn": 30,
+        "precision": 0.3684210526315789,
+        "recall": 0.1044776119402985,
+        "f1": 0.1627906976744186,
+        "label_positive_rate": 0.6146788990825688
+      },
+      "rust": {
+        "n": 109,
+        "tp": 36,
+        "fp": 19,
+        "fn": 31,
+        "tn": 23,
+        "precision": 0.6545454545454545,
+        "recall": 0.5373134328358209,
+        "f1": 0.5901639344262295,
+        "label_positive_rate": 0.6146788990825688
+      }
+    }
+  },
+  "generated_at": "2026-05-17T19:01:14.257055+00:00"
+}
