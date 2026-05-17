@@ -84,7 +84,7 @@ The MAST taxonomy (Cemri et al., NeurIPS 2025) is the canonical peer-reviewed ca
 
 What MAST does not cover (not a gap in MAST — outside its scope): single-agent UX/style dark patterns like sycophancy, paternalism, emoji-spam, TL;DR-bait, disclaimer-spam, AI-tells, meta-commentary, prompt-restate, roleplay-drift. Those map to DarkBench / DarkBench+ / DarkPatterns-LLM instead.
 
-Honest scope: this is conceptual mapping verified against MAST's `taxonomy_definitions_examples/definitions.txt`. Empirical precision/recall against the MAD dataset (1000+ annotated traces) is **not yet run**; it is the next planned evaluation slice and will land at `evaluation/MAST-RESULTS.md`.
+Honest scope: this is conceptual mapping verified against MAST's `taxonomy_definitions_examples/definitions.txt`. **Empirical precision/recall against the MAD dataset has now been run** — see [`evaluation/MAST-RESULTS.md`](evaluation/MAST-RESULTS.md). Headline finding: of the 13 hook slugs in the conceptual mapping, only `evidence_claims` (no-vibes) delivers strong coverage in practice (F1 **0.815** on MAST mode 3.3 against the 19-record human-labelled subset; F1 0.308 against the 954-record LLM-judge full set, consistent with MAST's 0.77 Cohen's Kappa label-quality ceiling). `honest_eta` is a high-precision low-recall tool on mode 2.6 (P 0.466, R 0.153). The other 11 hooks effectively don't fire at the trace-level scanning baseline — that mismatch (closeout-text-tuned hooks vs multi-agent-trajectory text) is documented in `MAST-RESULTS.md` along with the planned per-message scanning follow-up.
 
 ## The suite
 
