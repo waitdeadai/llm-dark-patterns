@@ -49,6 +49,7 @@ LLM "dark patterns" is now an academically-recognized category:
 - **IEEE S&P 2026** ([Investigating the Impact of Dark Patterns on LLM-Based Web Agents](https://arxiv.org/html/2510.18113)) — agents susceptible 41% of the time to a single dark pattern.
 - **CHI 2026** ([The Siren Song of LLMs](https://arxiv.org/html/2509.10830v3)) — user-perception study; users normalize dark patterns as "ordinary assistance."
 - **DarkPatterns-LLM** ([Dec 2025 benchmark](https://arxiv.org/html/2512.22470v1)) — 7 harm categories.
+- **MAST — Multi-Agent System failure Taxonomy** (Cemri et al. 2025, NeurIPS 2025, [arXiv:2503.13657](https://arxiv.org/abs/2503.13657), [repo](https://github.com/multi-agent-systems-failure-taxonomy/MAST)) — **14 failure modes in 3 categories**: specification & system design (41.8% of observed failures), inter-agent misalignment (36.9%), task verification & termination (21.3%). Built on 1600+ annotated traces across 7 MAS frameworks (AG2, AppWorld, HyperAgent, MagenticOne_GAIA, OpenManus_GAIA, programdev, math_interventions, mmlu). MAD dataset published at [huggingface.co/datasets/mcemri/MAD](https://huggingface.co/datasets/mcemri/MAD). Production multi-agent systems fail at 41–86.7% rates.
 - Sean Goedecke ([2024 essay](https://www.seangoedecke.com/ai-sycophancy/)) — *"Sycophancy is the first LLM dark pattern."* Naming convention now widespread.
 - Anthropic's own [Constitution](https://www.anthropic.com/constitution) — *"various forms of paternalism and moralizing are disrespectful."*
 
@@ -64,6 +65,46 @@ Two power-users have independently filed substantive issues against `anthropics/
 - **Sara** ([supplemental report on anthropics/claude-code#45502](https://github.com/anthropics/claude-code/issues/45502#issuecomment-4412107642), May 2026) — quantitative corpus over ~96 Claude Code sessions + 119 claude.ai exports. **1 disagreement in 96 sessions.** Refusal-to-disagree as substrate, not surface. claude.ai uses "profound" about the user 6 times; the user uses "profound" 0 times. Three months of CLAUDE.md rules suppressed certain words but not the disposition.
 
 See pinned issue [#6 — Field reports](https://github.com/waitdeadai/llm-dark-patterns/issues/6) for the per-finding mapping to specific hooks. Honest scope: this catches the textual signature, not the underlying disposition. The training-level fix Patti is asking for still belongs to Anthropic.
+
+### Mapping to MAST (Multi-Agent System failure Taxonomy)
+
+The MAST taxonomy (Cemri et al., NeurIPS 2025) is the canonical peer-reviewed catalogue of multi-agent failure modes. 13 of the 28 detector hooks in this suite conceptually map to 8 of MAST's 14 modes. **Empirical evaluation against the MAD dataset has now been run** — full results at [`evaluation/MAST-RESULTS.md`](evaluation/MAST-RESULTS.md). The mapping table is split into empirically-validated coverage and conceptual-only mapping below.
+
+#### Empirically-validated coverage (F1 > 0 measured vs MAD)
+
+| Hook | MAST mode | LLM-judge full (n=954) | Human-labelled (n=19) |
+|---|---|---|---|
+| `no-vibes` / `evidence_claims` | 3.3 No or Incorrect Verification | F1 **0.308** (P 0.226 R 0.486) | F1 **0.815** (P 0.733 R 0.917) |
+| `honest-eta` | 2.6 Action-Reasoning Mismatch | F1 0.230 (P 0.466 R 0.153) | 0 — no positives in subset |
+| `no-wrap-up` | 3.1 Premature Termination | F1 0.022 (P 0.167 R 0.012) | 0 — no positives in subset |
+| `no-phantom-tool-call` | 2.6 Action-Reasoning Mismatch | F1 0.005 (P 1.000 R 0.003) | 0 — no positives in subset |
+
+Read: **`no-vibes` is the strong multi-agent catch** — F1 0.815 on human-labelled traces against MAST's highest-prevalence mode (3.3). `honest-eta` and `no-phantom-tool-call` are high-precision low-recall tools (when they fire they're usually right; they just don't fire often on trajectory text). `no-wrap-up` fires rarely and is mostly noise.
+
+#### Conceptually mapped, no measured signal yet
+
+The following 9 hooks conceptually target their MAST mode but did not produce measurable F1 at the trace-level baseline against MAD. Reasons documented in [`evaluation/MAST-RESULTS.md`](evaluation/MAST-RESULTS.md) §"Honest findings":
+
+| Hook | Conceptually targets | Why no signal at trace-level baseline |
+|---|---|---|
+| `no-ownership-violation` (DOCUMENTED-LIMITED) | 1.2 Disobey Role Specification | Bash-canonical TaskCompleted event handler; Rust scan path passes by design |
+| `no-handoff-loop` (DOCUMENTED-LIMITED) | 1.3 Step Repetition, 1.5 Unaware of Termination Conditions | Same — TaskCreated event handler |
+| `no-fake-recall` | 1.4 Loss of Conversation History | Vocabulary tuned for chat-reply recall claims; trajectory text uses different scaffolding |
+| `no-cliffhanger` | 1.5 Unaware of Termination Conditions, 3.1 Premature Termination | `zone: tail` (last 520 chars) is the trajectory tail, not a closeout sentence |
+| `no-aggregator-hallucination`, `no-fake-stats` | 2.6 Action-Reasoning Mismatch | Tuned for supervisor closeouts; synthesis claim buried in trajectory chatter |
+| `no-cherry-pick-rollup`, `no-silent-worker-success`, `no-sandbagging-disguise` | 3.1 / 3.2 Verification failures | Calibrated for supervisor reports, not multi-turn collaboration text |
+
+The methodology gap is structural: hooks are tuned for individual Claude Code closeout messages; MAD's text is full multi-agent trajectory. Per-message scanning is the planned next experiment ([`MAST-RESULTS.md` §"Next steps"](evaluation/MAST-RESULTS.md)).
+
+#### MAST adjacency (no direct mode mapping)
+
+| Hook | Relationship to MAST |
+|---|---|
+| `no-credential-leak-in-handoff` | MAST commentary cites inter-agent privacy leakage as a failure surface but does not number a privacy mode in the 14-mode taxonomy |
+
+#### Outside MAST scope (by design)
+
+What MAST does not cover (single-agent UX / style dark patterns): `no-sycophancy`, `no-curfew`, `no-emoji-spam`, `no-tldr-bait`, `no-disclaimer-spam`, `no-ai-tells`, `no-meta-commentary`, `no-prompt-restate`, `no-roleplay-drift`. Those map to DarkBench / DarkBench+ / DarkPatterns-LLM instead — see the original DarkBench eval in [`evaluation/RESULTS.md`](evaluation/RESULTS.md).
 
 ## The suite
 
