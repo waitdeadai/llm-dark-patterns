@@ -49,6 +49,7 @@ LLM "dark patterns" is now an academically-recognized category:
 - **IEEE S&P 2026** ([Investigating the Impact of Dark Patterns on LLM-Based Web Agents](https://arxiv.org/html/2510.18113)) — agents susceptible 41% of the time to a single dark pattern.
 - **CHI 2026** ([The Siren Song of LLMs](https://arxiv.org/html/2509.10830v3)) — user-perception study; users normalize dark patterns as "ordinary assistance."
 - **DarkPatterns-LLM** ([Dec 2025 benchmark](https://arxiv.org/html/2512.22470v1)) — 7 harm categories.
+- **MAST — Multi-Agent System failure Taxonomy** (Cemri et al. 2025, NeurIPS 2025, [arXiv:2503.13657](https://arxiv.org/abs/2503.13657), [repo](https://github.com/multi-agent-systems-failure-taxonomy/MAST)) — **14 failure modes in 3 categories**: specification & system design (41.8% of observed failures), inter-agent misalignment (36.9%), task verification & termination (21.3%). Built on 1600+ annotated traces across 7 MAS frameworks (AG2, AppWorld, HyperAgent, MagenticOne_GAIA, OpenManus_GAIA, programdev, math_interventions, mmlu). MAD dataset published at [huggingface.co/datasets/mcemri/MAD](https://huggingface.co/datasets/mcemri/MAD). Production multi-agent systems fail at 41–86.7% rates.
 - Sean Goedecke ([2024 essay](https://www.seangoedecke.com/ai-sycophancy/)) — *"Sycophancy is the first LLM dark pattern."* Naming convention now widespread.
 - Anthropic's own [Constitution](https://www.anthropic.com/constitution) — *"various forms of paternalism and moralizing are disrespectful."*
 
@@ -64,6 +65,26 @@ Two power-users have independently filed substantive issues against `anthropics/
 - **Sara** ([supplemental report on anthropics/claude-code#45502](https://github.com/anthropics/claude-code/issues/45502#issuecomment-4412107642), May 2026) — quantitative corpus over ~96 Claude Code sessions + 119 claude.ai exports. **1 disagreement in 96 sessions.** Refusal-to-disagree as substrate, not surface. claude.ai uses "profound" about the user 6 times; the user uses "profound" 0 times. Three months of CLAUDE.md rules suppressed certain words but not the disposition.
 
 See pinned issue [#6 — Field reports](https://github.com/waitdeadai/llm-dark-patterns/issues/6) for the per-finding mapping to specific hooks. Honest scope: this catches the textual signature, not the underlying disposition. The training-level fix Patti is asking for still belongs to Anthropic.
+
+### Mapping to MAST (Multi-Agent System failure Taxonomy)
+
+The MAST taxonomy (Cemri et al., NeurIPS 2025) is the canonical peer-reviewed catalogue of multi-agent failure modes. 10 of the 28 detector hooks in this suite map directly to specific MAST modes, concentrated on the inter-agent misalignment and task-verification axes:
+
+| MAST mode | Category | Hook(s) in this suite |
+|---|---|---|
+| 1.2 Disobey Role Specification | spec & design | `no-ownership-violation` (DOCUMENTED-LIMITED) |
+| 1.3 Step Repetition | spec & design | `no-handoff-loop` (DOCUMENTED-LIMITED) |
+| 1.4 Loss of Conversation History | spec & design | `no-fake-recall` |
+| 1.5 Unaware of Termination Conditions | spec & design | `no-handoff-loop`, `no-cliffhanger` |
+| 2.6 Action-Reasoning Mismatch | inter-agent misalignment | `no-phantom-tool-call`, `no-aggregator-hallucination`, `no-fake-stats`, `honest-eta` |
+| 3.1 Premature Termination | task verification | `no-cherry-pick-rollup`, `no-cliffhanger`, `no-wrap-up` |
+| 3.2 Weak Verification | task verification | `no-cherry-pick-rollup`, `no-silent-worker-success`, `no-sandbagging-disguise` |
+| 3.3 No or Incorrect Verification | task verification | `no-vibes` / `evidence_claims`, `no-silent-worker-success` |
+| (privacy adjacency — MAST commentary cites inter-agent leakage but does not number a privacy mode) | n/a | `no-credential-leak-in-handoff` |
+
+What MAST does not cover (not a gap in MAST — outside its scope): single-agent UX/style dark patterns like sycophancy, paternalism, emoji-spam, TL;DR-bait, disclaimer-spam, AI-tells, meta-commentary, prompt-restate, roleplay-drift. Those map to DarkBench / DarkBench+ / DarkPatterns-LLM instead.
+
+Honest scope: this is conceptual mapping verified against MAST's `taxonomy_definitions_examples/definitions.txt`. Empirical precision/recall against the MAD dataset (1000+ annotated traces) is **not yet run**; it is the next planned evaluation slice and will land at `evaluation/MAST-RESULTS.md`.
 
 ## The suite
 
