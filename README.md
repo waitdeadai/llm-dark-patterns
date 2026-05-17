@@ -68,23 +68,43 @@ See pinned issue [#6 — Field reports](https://github.com/waitdeadai/llm-dark-p
 
 ### Mapping to MAST (Multi-Agent System failure Taxonomy)
 
-The MAST taxonomy (Cemri et al., NeurIPS 2025) is the canonical peer-reviewed catalogue of multi-agent failure modes. 10 of the 28 detector hooks in this suite map directly to specific MAST modes, concentrated on the inter-agent misalignment and task-verification axes:
+The MAST taxonomy (Cemri et al., NeurIPS 2025) is the canonical peer-reviewed catalogue of multi-agent failure modes. 13 of the 28 detector hooks in this suite conceptually map to 8 of MAST's 14 modes. **Empirical evaluation against the MAD dataset has now been run** — full results at [`evaluation/MAST-RESULTS.md`](evaluation/MAST-RESULTS.md). The mapping table is split into empirically-validated coverage and conceptual-only mapping below.
 
-| MAST mode | Category | Hook(s) in this suite |
+#### Empirically-validated coverage (F1 > 0 measured vs MAD)
+
+| Hook | MAST mode | LLM-judge full (n=954) | Human-labelled (n=19) |
+|---|---|---|---|
+| `no-vibes` / `evidence_claims` | 3.3 No or Incorrect Verification | F1 **0.308** (P 0.226 R 0.486) | F1 **0.815** (P 0.733 R 0.917) |
+| `honest-eta` | 2.6 Action-Reasoning Mismatch | F1 0.230 (P 0.466 R 0.153) | 0 — no positives in subset |
+| `no-wrap-up` | 3.1 Premature Termination | F1 0.022 (P 0.167 R 0.012) | 0 — no positives in subset |
+| `no-phantom-tool-call` | 2.6 Action-Reasoning Mismatch | F1 0.005 (P 1.000 R 0.003) | 0 — no positives in subset |
+
+Read: **`no-vibes` is the strong multi-agent catch** — F1 0.815 on human-labelled traces against MAST's highest-prevalence mode (3.3). `honest-eta` and `no-phantom-tool-call` are high-precision low-recall tools (when they fire they're usually right; they just don't fire often on trajectory text). `no-wrap-up` fires rarely and is mostly noise.
+
+#### Conceptually mapped, no measured signal yet
+
+The following 9 hooks conceptually target their MAST mode but did not produce measurable F1 at the trace-level baseline against MAD. Reasons documented in [`evaluation/MAST-RESULTS.md`](evaluation/MAST-RESULTS.md) §"Honest findings":
+
+| Hook | Conceptually targets | Why no signal at trace-level baseline |
 |---|---|---|
-| 1.2 Disobey Role Specification | spec & design | `no-ownership-violation` (DOCUMENTED-LIMITED) |
-| 1.3 Step Repetition | spec & design | `no-handoff-loop` (DOCUMENTED-LIMITED) |
-| 1.4 Loss of Conversation History | spec & design | `no-fake-recall` |
-| 1.5 Unaware of Termination Conditions | spec & design | `no-handoff-loop`, `no-cliffhanger` |
-| 2.6 Action-Reasoning Mismatch | inter-agent misalignment | `no-phantom-tool-call`, `no-aggregator-hallucination`, `no-fake-stats`, `honest-eta` |
-| 3.1 Premature Termination | task verification | `no-cherry-pick-rollup`, `no-cliffhanger`, `no-wrap-up` |
-| 3.2 Weak Verification | task verification | `no-cherry-pick-rollup`, `no-silent-worker-success`, `no-sandbagging-disguise` |
-| 3.3 No or Incorrect Verification | task verification | `no-vibes` / `evidence_claims`, `no-silent-worker-success` |
-| (privacy adjacency — MAST commentary cites inter-agent leakage but does not number a privacy mode) | n/a | `no-credential-leak-in-handoff` |
+| `no-ownership-violation` (DOCUMENTED-LIMITED) | 1.2 Disobey Role Specification | Bash-canonical TaskCompleted event handler; Rust scan path passes by design |
+| `no-handoff-loop` (DOCUMENTED-LIMITED) | 1.3 Step Repetition, 1.5 Unaware of Termination Conditions | Same — TaskCreated event handler |
+| `no-fake-recall` | 1.4 Loss of Conversation History | Vocabulary tuned for chat-reply recall claims; trajectory text uses different scaffolding |
+| `no-cliffhanger` | 1.5 Unaware of Termination Conditions, 3.1 Premature Termination | `zone: tail` (last 520 chars) is the trajectory tail, not a closeout sentence |
+| `no-aggregator-hallucination`, `no-fake-stats` | 2.6 Action-Reasoning Mismatch | Tuned for supervisor closeouts; synthesis claim buried in trajectory chatter |
+| `no-cherry-pick-rollup`, `no-silent-worker-success`, `no-sandbagging-disguise` | 3.1 / 3.2 Verification failures | Calibrated for supervisor reports, not multi-turn collaboration text |
 
-What MAST does not cover (not a gap in MAST — outside its scope): single-agent UX/style dark patterns like sycophancy, paternalism, emoji-spam, TL;DR-bait, disclaimer-spam, AI-tells, meta-commentary, prompt-restate, roleplay-drift. Those map to DarkBench / DarkBench+ / DarkPatterns-LLM instead.
+The methodology gap is structural: hooks are tuned for individual Claude Code closeout messages; MAD's text is full multi-agent trajectory. Per-message scanning is the planned next experiment ([`MAST-RESULTS.md` §"Next steps"](evaluation/MAST-RESULTS.md)).
 
-Honest scope: this is conceptual mapping verified against MAST's `taxonomy_definitions_examples/definitions.txt`. **Empirical precision/recall against the MAD dataset has now been run** — see [`evaluation/MAST-RESULTS.md`](evaluation/MAST-RESULTS.md). Headline finding: of the 13 hook slugs in the conceptual mapping, only `evidence_claims` (no-vibes) delivers strong coverage in practice (F1 **0.815** on MAST mode 3.3 against the 19-record human-labelled subset; F1 0.308 against the 954-record LLM-judge full set, consistent with MAST's 0.77 Cohen's Kappa label-quality ceiling). `honest_eta` is a high-precision low-recall tool on mode 2.6 (P 0.466, R 0.153). The other 11 hooks effectively don't fire at the trace-level scanning baseline — that mismatch (closeout-text-tuned hooks vs multi-agent-trajectory text) is documented in `MAST-RESULTS.md` along with the planned per-message scanning follow-up.
+#### MAST adjacency (no direct mode mapping)
+
+| Hook | Relationship to MAST |
+|---|---|
+| `no-credential-leak-in-handoff` | MAST commentary cites inter-agent privacy leakage as a failure surface but does not number a privacy mode in the 14-mode taxonomy |
+
+#### Outside MAST scope (by design)
+
+What MAST does not cover (single-agent UX / style dark patterns): `no-sycophancy`, `no-curfew`, `no-emoji-spam`, `no-tldr-bait`, `no-disclaimer-spam`, `no-ai-tells`, `no-meta-commentary`, `no-prompt-restate`, `no-roleplay-drift`. Those map to DarkBench / DarkBench+ / DarkPatterns-LLM instead — see the original DarkBench eval in [`evaluation/RESULTS.md`](evaluation/RESULTS.md).
 
 ## The suite
 
