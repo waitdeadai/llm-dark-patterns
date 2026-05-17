@@ -314,10 +314,14 @@ claude plugin install llm-dark-patterns@waitdeadai-plugins
 
 This installs all 31 wired hooks across `Stop`, `SubagentStop`, `TaskCreated`, `TaskCompleted`, `PreToolUse`, `PostToolUse`, `PreCompact`, `PostCompact`, and `SessionStart` events. Each hook remains independently disablable by editing `hooks.json` after install.
 
-The self-hosted marketplace at [`waitdeadai/claude-plugins`](https://github.com/waitdeadai/claude-plugins) exists because the Anthropic community marketplace pipeline is currently dropping submissions: this plugin shows as **Published** in the submissions dashboard since 2026-05-11 but does not appear in the live `claude-plugins-community/marketplace.json` (verified 2026-05-16, zero matches across 1715 entries). Tracking issues: [anthropics/claude-plugins-official#1887](https://github.com/anthropics/claude-plugins-official/issues/1887), [#1272](https://github.com/anthropics/claude-plugins-official/issues/1272), [#984](https://github.com/anthropics/claude-plugins-official/issues/984). Once Anthropic's pipeline catches up, the community-marketplace path will also work as a fallback:
+The self-hosted marketplace at [`waitdeadai/claude-plugins`](https://github.com/waitdeadai/claude-plugins) is the **canonical install path** because the Anthropic community marketplace pipeline has stalled for many submitters since at least March 2026. This plugin shows as **Published** in the submissions dashboard since 2026-05-11 but does not appear in the live `claude-plugins-community/marketplace.json` (verified 2026-05-17 — zero matches across 1715 entries; last bulk sync to that file was 2026-05-13 with no new syncs since).
+
+The same pattern is documented across at least eight open issues on `anthropics/claude-plugins-official`: [#984](https://github.com/anthropics/claude-plugins-official/issues/984) (since 2026-03-25, 11 comments), [#1272](https://github.com/anthropics/claude-plugins-official/issues/1272) (closed without resolution, 23+ "same here" comments), [#1474](https://github.com/anthropics/claude-plugins-official/issues/1474), [#1512](https://github.com/anthropics/claude-plugins-official/issues/1512), [#1834](https://github.com/anthropics/claude-plugins-official/issues/1834), [#1841](https://github.com/anthropics/claude-plugins-official/issues/1841), [#1870](https://github.com/anthropics/claude-plugins-official/issues/1870), [#1887](https://github.com/anthropics/claude-plugins-official/issues/1887). Two sync PRs ([#18](https://github.com/anthropics/claude-plugins-community/pull/18), [#21](https://github.com/anthropics/claude-plugins-community/pull/21)) have been stuck unmerged for 12-15 days.
+
+If Anthropic's pipeline resumes, the community-marketplace path becomes a redundant install option, but until then the self-hosted route above is the only one that actually resolves:
 
 ```bash
-# Fallback (currently does not resolve; pending #1887)
+# Currently does NOT resolve for this plugin or for many others — see #1887
 claude plugin marketplace add anthropics/claude-plugins-community
 claude plugin install llm-dark-patterns@claude-community
 ```
