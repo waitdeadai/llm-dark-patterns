@@ -151,11 +151,33 @@ Modes with kappa `—` have zero positive votes across all annotators in the rel
 
 **Mode 3.3 has perfect inter-annotator agreement (kappa 1.000) on the released human set** — the F1 0.815 claim does not suffer from label noise on the target mode. This is the strongest defensible form of the headline claim.
 
+### Bash-Rust parity verified
+
+The F1 0.815 above was measured with the Rust engine `bin/agentcloseout-physics` v0.2.0 implementing the `evidence_claims` rule pack. A natural follow-up question — does the standalone bash hook ([`waitdeadai/no-vibes`](https://github.com/waitdeadai/no-vibes), 529 lines, jq-only) produce the same predictions — was open until 2026-05-18. Parity test run on the same n=19 human-labelled subset with the same Stop-hook JSON payload shape, same 200k char truncation, same label parsing:
+
+| Metric | Bash-direct (`no-vibes.sh`) | Rust engine (`agentcloseout-physics` v0.2.0) | Delta |
+|---|---|---|---|
+| F1 | **0.8148** | 0.8148 | 0.0000 |
+| Precision | 0.7333 | 0.7333 | 0.0000 |
+| Recall | 0.9167 | 0.9167 | 0.0000 |
+| TP / FP / FN / TN | 11 / 4 / 1 / 3 | 11 / 4 / 1 / 3 | 0 |
+| Bootstrap 95% CI (B=10000, seed=42) | [0.6154, 0.9412] | [0.615, 0.941] | within rounding |
+| Per-trace disagreements | **0 / 19** | — | — |
+
+**Zero per-trace disagreement on the n=19 set.** The two implementations make identical predictions on every trace; the published F1 0.815 claim holds for either implementation on this evaluation slice. The base-rate concern documented in the suite README ("Rust YAML rule pack can produce material F1 uplift over bash regex" — e.g. `no-roleplay-drift` bash F1 0.163 → Rust F1 0.590) does not apply to `evidence_claims` on this slice.
+
+Out of scope (open for follow-up):
+- Parity on the n=954 LLM-judge full set (Rust F1 0.308 untested in bash)
+- Parity on other categories in the suite (`honest_eta`, `wrap_up`, `phantom_tool_call`, etc.)
+- Parity on non-MAD surfaces (DarkBench, AgentCloseoutBench gold set, Claude Code closeout text)
+
+Runner and full report: [`waitdeadai/agent-closeout-bench` evaluation/runs/mast_human_bash_parity.md](https://github.com/waitdeadai/agent-closeout-bench/blob/main/evaluation/runs/mast_human_bash_parity.md) (introduced in [PR #11](https://github.com/waitdeadai/agent-closeout-bench/pull/11)).
+
 ### What this rigor pass changes
 
 The `no-vibes` claim travels publicly as the following compound statement:
 
-> `no-vibes` catches MAST mode 3.3 ("No or Incorrect Verification") with F1 **0.815** (95% CI [0.615, 0.941]) on n=19 human-labelled multi-agent traces, where inter-annotator Fleiss kappa for mode 3.3 specifically is **1.000** (perfect agreement). On the LLM-judge full set (n=954), F1 is **0.308** (95% CI [0.264, 0.352]), consistent with the documented LLM-judge agreement ceiling (paper kappa 0.77 LLM-judge vs human on the 150-trace taxonomy-development set). Per-MAS breakdown shows the result is not driven by a single framework; AG2/AppWorld/HyperAgent are uniformly classified correctly on the small human-labelled cells, while ChatDev/MetaGPT are weaker.
+> `no-vibes` catches MAST mode 3.3 ("No or Incorrect Verification") with F1 **0.815** (95% CI [0.615, 0.941]) on n=19 human-labelled multi-agent traces, where inter-annotator Fleiss kappa for mode 3.3 specifically is **1.000** (perfect agreement). The result is implementation-independent: bash hook and Rust engine produce identical predictions on all 19 traces (zero per-trace disagreement). On the LLM-judge full set (n=954), F1 is **0.308** (95% CI [0.264, 0.352]), consistent with the documented LLM-judge agreement ceiling (paper kappa 0.77 LLM-judge vs human on the 150-trace taxonomy-development set). Per-MAS breakdown shows the result is not driven by a single framework; AG2/AppWorld/HyperAgent are uniformly classified correctly on the small human-labelled cells, while ChatDev/MetaGPT are weaker.
 
 This is the form that survives NeurIPS-level reviewer scrutiny — point estimate + CI + label-quality ceiling + framework breakdown — and is the form downstream artifacts (workshop submissions, framework PRs, citing papers) should use.
 
