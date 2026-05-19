@@ -173,6 +173,14 @@ Out of scope (open for follow-up):
 
 Runner and full report: [`waitdeadai/agent-closeout-bench` evaluation/runs/mast_human_bash_parity.md](https://github.com/waitdeadai/agent-closeout-bench/blob/main/evaluation/runs/mast_human_bash_parity.md) (introduced in [PR #11](https://github.com/waitdeadai/agent-closeout-bench/pull/11)).
 
+### Taxonomy bridge: recognition-without-arrest
+
+MAST mode 3.3 ("No or Incorrect Verification") is the published evaluation handle for a failure mode that the operator-side community names *recognition-without-arrest*: a three-stage decomposition (Recognition → Articulation → Non-gating) in which the model recognises the gap, articulates the gap, and proceeds as if the gap did not exist. The framework was anchored by [@suwayama in `anthropics/claude-code#60226`](https://github.com/anthropics/claude-code/issues/60226) and synthesized across 10 reporter-credited patterns in [@yurukusa's gist](https://gist.github.com/yurukusa/93123855318c022f21df92a7ac33c87b) (2026-05-19).
+
+The F1 0.815 / CI [0.615, 0.941] / κ 1.000 result above measures the Stage 3 gate (non-gating) specifically. The bash-Rust parity result is independent evidence for the "out-of-loop, deterministic, code-not-model" architectural property surfaced in [`anthropics/claude-code#60188`](https://github.com/anthropics/claude-code/issues/60188): the verdict lives in the rule grammar, not the engine, so the gate cannot be downstream of the same distribution that produced the recognition.
+
+The bidirectional cross-link sits at [`anthropics/claude-code#60451`](https://github.com/anthropics/claude-code/issues/60451) and as a comment on the gist itself.
+
 ### What this rigor pass changes
 
 The `no-vibes` claim travels publicly as the following compound statement:
