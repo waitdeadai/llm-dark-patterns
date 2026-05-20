@@ -21,14 +21,16 @@ Each scenario in [`smoke.sh`](smoke.sh):
 
 ## Coverage
 
-12 scenarios across positive / negative / edge:
+24 scenarios across two language families and positive / negative / edge categories:
 
-**Positive (hook should fire advisory):**
-- P1: bare function with no callers
-- P2: class with no instantiation
+**Python — Slice 0** (12 scenarios):
+
+Positive (hook should fire advisory):
+- P1: bare `def` with no callers
+- P2: `class` with no instantiation
 - P3: function only referenced from `tests/` directory
 
-**Negative (hook should NOT fire):**
+Negative (hook should NOT fire):
 - N1: function with caller in `src/`
 - N2: `@app.route` decorator (Flask-style)
 - N3: `@router.get` decorator (FastAPI-style)
@@ -37,9 +39,29 @@ Each scenario in [`smoke.sh`](smoke.sh):
 - N6: registry value form `HANDLERS = {"foo": foo_handler}`
 - N7: private prefix `_internal_helper` (always ignored)
 
-**Edge:**
+Edge:
 - E1: no Python files in diff
 - E2: dunder methods `__init__` / `__str__` (always ignored)
+
+**TypeScript / JavaScript — Slice 1** (12 scenarios):
+
+Positive (hook should fire advisory):
+- P-TS1: bare `export function` no callers
+- P-TS2: `export class` no instantiation
+- P-TS3: `export const` arrow function no references
+
+Negative (hook should NOT fire):
+- N-TS1: `export function` with caller in `src/`
+- N-TS2: NestJS `@Controller` decorated class
+- N-TS3: Next.js `pages/*.tsx` default export (path-glob skip)
+- N-TS4: barrel re-export via `index.ts` (public API marker)
+- N-TS5: registry value form `const HANDLERS = {"foo": tsFooHandler}`
+- N-TS6: private prefix `_internalTsHelper` (always ignored)
+- N-TS7: `export default class` with `import` in another file
+
+Edge:
+- E-TS1: no TS/JS files in diff (e.g., only Rust changed)
+- E-TS2: anonymous default export `export default function () {...}` (no name to extract)
 
 ## Running the suite
 
@@ -50,13 +72,15 @@ bash tests/no-unreachable-symbol/smoke.sh --quiet   # only summary + failures
 
 Exit code `1` if any scenario fails; `0` otherwise.
 
-## Known limitations (Slice 0)
+## Known limitations (Slices 0 + 1)
 
-- **Python only**. TypeScript/JS, Rust, Go are future slices.
+- **Python (Slice 0) + TypeScript/JavaScript (Slice 1) only**. Rust, Go are future slices.
 - **Advisory mode by default**. Strict mode (exit 2) is opt-in via `LDP_UNREACHABLE_SYMBOL_BLOCK=1` and the operator must opt in deliberately.
 - **No empirical baseline**. MAD is text-only; no public dataset of dead-code-vs-properly-wired diffs. Smoke suite is the contract instead.
 - **Reference-permissive caller check**. Any text occurrence of the symbol name in non-test code counts as a reference (including comments). False-negative direction is intentional in advisory mode — a function the codebase knows by name is more likely wired than one with zero textual mentions.
 - **No AST-level reachability**. v1 stays grep-based; AST-level pass is a future slice (Python `ast.parse`, TS via `ts-morph` or similar).
+- **TS/JS path-glob skip is built-in but not configurable**. `pages/**`, `app/**`, `api/**`, `routes/**` are hardcoded as framework-conventions; future slice adds project-level `.no-unreachable-symbol.toml` config.
+- **TS interfaces / types / enums not detected**. Slice 1 only handles `function`, `class`, `const`, `let`, `var`, `default function`, `default class`. Types referenced as types (not values) need a different reference-check pattern; deferred.
 
 ## Adding a new scenario
 
