@@ -17,6 +17,14 @@ The conceptual MAST mapping in the README claimed 13 hook slugs across 8 MAST mo
 
 The README's "10 hooks across 8 MAST modes" coverage claim is **empirically a positioning claim, not a measured result**. Reading this report makes the positioning honest: the suite has one strong multi-agent catch (no-vibes for verification claims) and a handful of narrow ones; the rest of the conceptual mapping does not survive contact with the MAD dataset under the current methodology.
 
+## Background: per-session baseline rate
+
+The F1 0.815 result on `evidence_claims`/mode 3.3 measures what fraction of a per-session baseline of the underlying failure mode a deterministic grammar at one specific gate catches. `@beq00000`'s [clean-state evidence on `anthropics/claude-code#60226`](https://github.com/anthropics/claude-code/issues/60226#issuecomment-4491987732) (2026-05-19) provides the base rate observation: *"Seven instances of recognition-without-arrest in a non-drifted session, all caught externally."* Single working day, low-stakes decisions, no operator-identified register drift. The same comment names the load-bearing claim:
+
+> The pattern is the default mode, not the drift mode. The drifted sessions in the constellation accumulate failures because the rate compounds; the underlying mechanism fires at clean-state baseline. Patches that address only the drift entry-points leave the failure surface intact.
+
+This matters for reading the F1 number. The hook does not need to catch every instance to be useful; it needs to catch enough of the consequential closeout-boundary instances that the operator's external observation is no longer the only gate. The per-session baseline rate documents what "enough" is calibrated against. The constellation framework that names the failure mode the result measures (recognition-without-arrest, three-stage decomposition) is documented at [yurukusa's gist](https://gist.github.com/yurukusa/93123855318c022f21df92a7ac33c87b) with framework attribution to @suwayama (#60226 anchor); see also §"Taxonomy bridge" below for the bidirectional cross-link with MAST 3.3.
+
 ## Methodology
 
 ### Trace-level baseline scan
