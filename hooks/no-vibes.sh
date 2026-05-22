@@ -378,8 +378,46 @@ has_command_evidence() {
   return 1
 }
 
+_has_only_fake_binaries() {
+  # True when the message contains backtick-quoted commands BUT none of the
+  # backticked tokens reference a binary in EVIDENCE_BINARIES_RE (the evidence-
+  # binary allowlist pack). The presence of backticks asserts "I ran a command"
+  # while none of the cited commands are real verification tools — i.e., the
+  # message is fabricating evidence.
+  #
+  # Returns 0 (true: fake-only) when backticks exist and ALL of them miss the
+  # allowlist. Returns 1 (false: not the fake-only pattern) when either no
+  # backticks at all, OR at least one backticked token is a real evidence
+  # binary. This is a precondition guard: paired with has_verification_evidence
+  # below, it prevents the broader verification regex from rubber-stamping
+  # fake-tool closeouts that happen to land a verification keyword + colon
+  # within proximity.
+  #
+  # Closes fixture tests/stress/no-vibes/positive/24-fake-binary-not-in-pack.json
+  # without narrowing the 8ec7e60 broader-recognition behavior for the
+  # operator's legitimate "Verification done (cite exact evidence):" shape.
+  local message="$1"
+  local backticked
+  backticked=$(printf '%s' "$message" | grep -oE '`[^`]+`' 2>/dev/null | tr -d '`')
+  [ -z "$backticked" ] && return 1
+  if printf '%s\n' "$backticked" | grep -Eq "^(${EVIDENCE_BINARIES_RE})([[:space:]]|$)"; then
+    return 1
+  fi
+  return 0
+}
+
 has_verification_evidence() {
   local message="$1"
+  # Guard: if backtick-quoted commands exist but none are in EVIDENCE_BINARIES_RE,
+  # the message is asserting verification with fabricated tools — fail closed.
+  # The broader recognition below (from 8ec7e60) is preserved for the operator's
+  # claudemax legitimate-closeout shape; this guard only catches the fake-tool
+  # pattern (e.g., fixture 24: "Ran `myfakebinaryxyz` for verification, output:
+  # success." where "verification" + "," + "output:" trips the broader regex
+  # but the only backticked tool isn't a real verifier).
+  if _has_only_fake_binaries "$message"; then
+    return 1
+  fi
   # Match a verification keyword followed within ~50 chars by either a colon
   # (e.g., "Verification done (cite exact evidence):") OR a success token
   # (passed, pass, ok, succeeded, clean, green). The original tighter form
