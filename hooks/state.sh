@@ -326,14 +326,40 @@ def write_current(payload: dict) -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
     text = markdown(payload)
-    tmp = CURRENT.with_suffix(".tmp")
+    # PID-unique tmp to avoid races when multiple hook entries (user/project/
+    # plugin scopes) all fire state-precompact concurrently. Without this,
+    # one process's tmp.replace(CURRENT) consumes the file before the next's
+    # rename, yielding FileNotFoundError on the .tmp source path.
+    tmp = CURRENT.with_suffix(f".{os.getpid()}.tmp")
     tmp.write_text(text, encoding="utf-8")
-    tmp.replace(CURRENT)
+    # Retry the atomic rename a couple of times in case a concurrent writer
+    # has the destination momentarily locked on Windows-style filesystems.
+    last_err: Exception | None = None
+    for _ in range(3):
+        try:
+            tmp.replace(CURRENT)
+            last_err = None
+            break
+        except FileNotFoundError as e:
+            last_err = e
+            # The source tmp vanished — almost certainly because a concurrent
+            # writer already moved its own tmp into CURRENT. That's fine; the
+            # invariant (CURRENT.md exists with fresh content) is preserved.
+            break
+        except OSError as e:
+            last_err = e
+            time.sleep(0.05)
+    if last_err is not None and tmp.exists():
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
 
-    stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    session = re.sub(r"[^A-Za-z0-9_.-]+", "-", payload["session_id"])[:80] or "unknown"
-    snapshot = SNAPSHOTS_DIR / f"{stamp}-{session}.md"
-    shutil.copy2(CURRENT, snapshot)
+    if CURRENT.exists():
+        stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        session = re.sub(r"[^A-Za-z0-9_.-]+", "-", payload["session_id"])[:80] or "unknown"
+        snapshot = SNAPSHOTS_DIR / f"{stamp}-{session}-{os.getpid()}.md"
+        shutil.copy2(CURRENT, snapshot)
     append_event(payload)
 
 
