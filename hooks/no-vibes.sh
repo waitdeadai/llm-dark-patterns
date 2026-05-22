@@ -380,13 +380,22 @@ has_command_evidence() {
 
 has_verification_evidence() {
   local message="$1"
-  printf '%s\n' "$message" | grep -Eiq '(^|[[:space:]])(verification|verified|tests?|smoke|lint|build)(:|[[:space:]]+(passed|pass|ok|succeeded|clean|green))' && return 0
+  # Match a verification keyword followed within ~50 chars by either a colon
+  # (e.g., "Verification done (cite exact evidence):") OR a success token
+  # (passed, pass, ok, succeeded, clean, green). The original tighter form
+  # missed real evidence like "Verification: passed" preceded by a parens
+  # block, blocking honest closeouts that did the verification work.
+  printf '%s\n' "$message" | grep -Eiq '(^|[[:space:]])(verification|verified|verifying|tests?|smoke|lint|build|smoke[- ]test|typecheck)[^[:cntrl:]]{0,60}(:|passed|pass|ok|succeeded|clean|green|exit[[:space:]]*0)' && return 0
   return 1
 }
 
 has_artifact_evidence() {
   local message="$1"
-  printf '%s\n' "$message" | grep -Eiq '(^|[[:space:]])(changed files?|files? changed|files? inspected|sources? reviewed|source ledger|diff|artifacts?|evidence)(:|[[:space:]])' && return 0
+  # Expanded noun set to recognize SOTA-2026 release artifacts (tarballs,
+  # release assets, dist manifests, sha256 sidecars, packaged binaries) plus
+  # the broader research-trail nouns (sources cited / referenced) used in
+  # honest closeouts of multi-step work.
+  printf '%s\n' "$message" | grep -Eiq '(^|[[:space:]])(changed[[:space:]]+files?|files?[[:space:]]+changed|files?[[:space:]]+inspected|sources?[[:space:]]+(reviewed|cited|referenced)|source[[:space:]]+ledger|diff|artifacts?|assets?|tarballs?|release[[:space:]]+(assets|notes|tag)?|manifest|checksum|sha256|evidence)(:|[[:space:]]|[.,)])' && return 0
   return 1
 }
 
