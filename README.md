@@ -326,6 +326,20 @@ Hooks tested as black-box text classifiers against the same corpus. With the Rus
 
 Honest data: the hooks have a documented vocabulary-distribution gap when applied to chat-reply text vs the Claude Code closeout text they were designed for. Reproducible end-to-end (~$12 PAYG-equiv, ~3 hours sequential). [Full v1 results →](evaluation/RESULTS.md) · [Head-to-head bash-vs-Rust comparison (v1.5-rust) →](evaluation/RESULTS-v1.5-rust.md)
 
+### Held-out validation against the 2026 sycophancy literature (v3/v4)
+
+v3 built a leakage-safe held-out and asked whether the hooks' training-set numbers survive contact with independent test positives. Every F1 below carries a bootstrap 95% CI (1000 samples, seed 42); scoring is deterministic. [Full v3/v4 results →](evaluation/v3/RESULTS.md)
+
+| Hook | Before | After (held-out) | Result |
+|---|---|---|---|
+| `no-sycophancy` | 0.667 TRAIN (unvalidated) | **F1 0.298** (P 1.00, R 0.175) | the 0.667 **does not survive** |
+| `no-roleplay-drift` | 0.545 TEST | **0.640** TEST [CI 0.40–0.82] | improved; 0.70 not cleared (surface-conflict ceiling, ablation-confirmed) |
+| `honest_eta` | 0.230 (MAST 2.6) | **0.461** via `honest_eta ∪ evidence_claims` cascade [CI 0.42–0.50] | recall lift via ensemble, not hook change |
+
+The headline is a **negative result, reported as one**: against a taxonomy-grounded held-out (n=58, 40 positives), `no-sycophancy` v2 is a high-precision *opener-praise* detector — recall 0.83 on opener-praise but **0.00 on multi-turn capitulation, 0.00 on false-statement validation, 0.08 on social/face-preserving sycophancy**. A v4 attempt to add capitulation/social regex tiers lifted training recall (0.18→0.60) but **overfit** — a fresh held-out (novel phrasing, dual-judge-validated, Cohen's κ = 1.0) showed no significant gain (F1 0.231→0.296, overlapping CIs), so v4 was not shipped. Lexical regex cannot close the sycophancy recall gap; semantic detection is the v5 path. Both hooks also show total **cross-lingual collapse** (0/3 on Spanish positives) — the patterns are English-only.
+
+**Relation to prior work.** The held-out corpus is synthesized from the published 2026 sycophancy taxonomies — [SycEval (arXiv:2502.08177)](https://arxiv.org/abs/2502.08177) (progressive/regressive, preemptive/in-context rebuttals), [ELEPHANT (arXiv:2505.13995)](https://arxiv.org/abs/2505.13995) (social/face-preserving), multi-turn sycophancy ([arXiv:2505.23840](https://arxiv.org/abs/2505.23840)), and [BrokenMath (arXiv:2510.04721)](https://arxiv.org/abs/2510.04721) (well-posed false-statement validation). Those are detection *corpora/taxonomies*; this is the leakage-safe *enforcement-hook* held-out with dual-judge κ, and it reports where the enforcement layer fails. The closest enforcement-side peer, [*The Silicon Mirror: Dynamic Behavioral Gating for Anti-Sycophancy in LLM Agents* (arXiv:2604.00478)](https://arxiv.org/html/2604.00478), proposes dynamic gating; this suite contributes the measured per-mode recall floor a deterministic gate actually achieves today.
+
 ## Install (recommended): self-hosted marketplace
 
 ```bash
