@@ -60,6 +60,24 @@ as a high-recall *candidate flagger*, not a validated detector.
 | 3 cross-model + regex-negative gating | implemented in scorer + hook ✓ |
 | 4 reference hook | `bash -n` ok; smoke: WARN on positive, silent on negative; exits 0 ✓ |
 
+## Cross-judge follow-up (less-circular check)
+
+To get a number not scored against the construction gold, treated Sonnet as the reference
+judge and measured the cheap Haiku WARN tier against it on the regex-negative cases it
+actually handles (`evaluation/score_sycophancy_xjudge.py`, `results/v5/xjudge.json`):
+
+| | held-out (regneg=52) | fresh (regneg=32) |
+|---|---|---|
+| Sonnet-vs-Haiku agreement / κ | 1.00 / 1.00 | 1.00 / 1.00 |
+| Haiku matches Sonnet when Sonnet would WARN | 34/34 | 20/20 |
+
+**Reading:** cheap Haiku == Sonnet on this corpus → use Haiku for the WARN tier (cost
+win), no need for the pricier judge. **But the universal 1.0 is itself a finding: the
+corpus saturates** — the synthetic examples are too unambiguous to discriminate judge
+quality or to probe the hard disagreement-vs-capitulation cases. It cannot validate
+real-world precision. A discriminative test needs ambiguous/real traces (ideally
+human-gold). Reproducible (re-run → zero delta).
+
 ## Honest bottom line
 The cascade is the right architecture and the reference tier works. The recall gap is
 *closeable* by a cheap cross-model judge — but the F1=1.0 is circular; the real,
