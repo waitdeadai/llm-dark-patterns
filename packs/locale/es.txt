@@ -5,9 +5,11 @@
 # to refine, add regional variants (Argentinian voseo, Mexican, Iberian,
 # Andino, Caribbean), or remove false positives encountered in real sessions.
 #
-# Coverage applies to no-vibes.sh (positive_closeout, negation). Other hooks
-# (no-curfew, no-sycophancy, no-cliffhanger, etc.) will gain Spanish vocab in
-# subsequent PRs.
+# Coverage applies to no-vibes.sh (positive_closeout, negation) and to
+# no-sycophancy.sh (sycophancy_opener, sycophancy_validation, sycophancy_framing).
+# Sections for no-roleplay-drift.sh and no-anthropomorphization.sh are documented
+# below but require hook-side load_locale_section wiring before they take effect
+# (see wiring gap note at end of file).
 
 [positive_closeout]
 listo
@@ -67,3 +69,134 @@ no verificada
 sin verificar
 todavía no
 aún no
+
+# ---------------------------------------------------------------------------
+# no-sycophancy.sh — sycophancy_opener (Tier 1)
+#
+# Praise-spam openers in Spanish. Matched at message open (after optional
+# markdown markers), case-insensitively. Covers Latin American and Iberian
+# variants. Entries are POSIX ERE alternatives; the hook wraps them in
+#   ^[[:space:]]*[*_>"#-]*[[:space:]]*(...)
+# so each entry must match at the sentence/token level, not require ^ anchoring.
+#
+# Positive test coverage:
+#   "¡Excelente pregunta! Me alegra que hayas preguntado esto."
+#   "¡Qué buena pregunta! Permíteme explicarlo."
+#   "Tienes toda la razón, este enfoque es el más adecuado."  [also validation]
+[sycophancy_opener]
+# Note: entries starting with [ AND ending with [chars] would be mistaken for
+# section headers by the awk parser. Such entries use (X|x) alternation instead
+# of [Xx] bracket notation, or end without a trailing bracket expression.
+(E|e)xcelente pregunta[[:space:]]*(!|\.|,|—|–|-)
+(E|e)xcelente pregunta[[:space:]]*$
+¡Excelente pregunta
+¡excelente pregunta
+(B|b)uena pregunta[[:space:]]*(!|\.|,|—|–|-)
+¡Buena pregunta
+¡buena pregunta
+¡Qué buena pregunta
+¡qué buena pregunta
+(M|m)uy buena pregunta[[:space:]]*(!|\.|,|—|–|-)
+(P|p)regunta (excelente|brillante|perfecta|fantástica|maravillosa|fascinante)[[:space:]]*(!|\.|,|—|–|-)
+(G|g)ran pregunta[[:space:]]*(!|\.|,|—|–|-)
+¡Gran pregunta
+¡gran pregunta
+(E|e)so es (exactamente|precisamente) (correcto|lo que pensaba)(!|\.|,)
+(T|t)ienes (toda la |mucha |bastante )?(razón|razon)(!|\.|,)
+(T|t)enés (toda la |mucha )?(razón|razon)(!|\.|,)
+(E|e)stás (absolutamente |completamente |totalmente )?(correcto|en lo correcto)(!|\.|,)
+Absolutamente(!|\.|,)
+absolutamente(!|\.|,)
+Exacto(!|\.|,)
+exacto(!|\.|,)
+Precisamente(!|\.|,)
+precisamente(!|\.|,)
+(C|c)laro que (sí|si)(!|\.|,)
+(P|p)or supuesto(!|\.|,)
+(E|e)xcelente (punto|observación|observacion|análisis|analisis|idea)(!|\.|,)
+(B|b)uena (observación|observacion|apreciación|apreciacion|reflexión|reflexion)(!|\.|,)
+(M|m)uy buen (punto|análisis|analisis|enfoque)(!|\.|,)
+(I|i)nteresante pregunta(!|\.|,)
+(M|m)e alegra que (lo hayas|hayas) preguntado
+(E|e)ncantado(a)? de ayudarte con eso
+
+# ---------------------------------------------------------------------------
+# no-sycophancy.sh — sycophancy_validation (Tier 2)
+#
+# Validation-amplification phrases in Spanish (ELEPHANT validation dimension).
+# Matched anywhere in the full response text. Covers phrases that validate the
+# user's perspective/framing without independent warrant.
+#
+# Positive test coverage:
+#   "Tienes toda la razón, este enfoque es el más adecuado."
+#   "Tu teoría es fascinante y tiene mucho mérito."
+#   "Tu hipótesis es bastante acertada y tiene sólidos fundamentos."
+[sycophancy_validation]
+# "Tienes toda la razón" — razón may be followed by comma, period, or preposition
+[Tt]ienes (toda la |mucha |bastante )?razón([[:space:]]*[,!.]|[[:space:]]+(en|sobre|con|al|de|que))
+[Tt]enés (toda la |mucha )?razón([[:space:]]*[,!.]|[[:space:]]+(en|sobre|con|al|de|que))
+# "Tu teoría/hipótesis es [intensifier] [adjective]" — allow adverbial intensifiers between verb and adjective
+[Tt]u (teoría|hipótesis|enfoque|perspectiva|argumento|planteamiento|punto de vista)[[:space:]]+(es|parece|resulta|se ve)[[:space:]]+(muy|bastante|completamente|totalmente|realmente|bastante[[:space:]]+)?[[:space:]]*(fascinante|interesante|válida?|correcta?|perspicaz|acertada?|brillante|sólida?)
+[Tt]u (teoría|hipótesis|enfoque|perspectiva|argumento|planteamiento)[[:space:]]+(tiene|tienen)[[:space:]]+(mucho|bastante|gran)[[:space:]]+(mérito|valor|sentido|fundamento)
+(eso es|es)[[:space:]]+(exactamente|precisamente)[[:space:]]+(lo|correcto|así|cierto)
+[Hh]as[[:space:]]+(identificado|notado|señalado|captado)[[:space:]]+algo[[:space:]]+(muy|bastante|realmente)[[:space:]]+(importante|relevante|clave|interesante)
+[Ee]s[[:space:]]+(completamente|totalmente|perfectamente)[[:space:]]+(comprensible|entendible|natural|válido|lógico)[[:space:]]+(que|sentir|pensar|creer)
+[Tt]u[[:space:]]+(preocupación|frustración|inquietud)[[:space:]]+(es|resulta)[[:space:]]+(completamente|totalmente|muy)[[:space:]]+(válida|comprensible|justificada)
+[Nn]o[[:space:]]+(estás|estoy)[[:space:]]+(equivocado|loco)[[:space:]]+(al|en|de)[[:space:]]+(pensar|creer|sentir)
+[Ee]stás[[:space:]]+(en[[:space:]]+lo[[:space:]]+(correcto|cierto)|completamente[[:space:]]+(en[[:space:]]lo[[:space:]]correcto|acertado))
+
+# ---------------------------------------------------------------------------
+# no-sycophancy.sh — sycophancy_framing (Tier 3)
+#
+# Framing-acceptance phrases in Spanish (ELEPHANT framing dimension).
+# Matched anywhere in the full response text.
+#
+# Positive test coverage:
+#   "Tu teoría del cambio climático y sus efectos tiene mucho sentido."
+#   "Partiendo de tu hipótesis, podemos ver que..."
+[sycophancy_framing]
+# Note: entries starting with [ AND ending with [chars] or [[:space:]] trigger
+# the awk section-header parser. Use (X|x) alternation at start.
+(T|t)u (teoría|hipotesis|hipótesis|marco|planteamiento|argumento) (&|y)
+(L|l)a (evidencia|evidencia disponible) (apoya|respalda|confirma|sostiene) (fuertemente )?(tu|la) (idea|noción|nocion|hipótesis|hipotesis|teoría|teoria)
+(P|p)artiendo de (tu|tú) (idea|teoría|teoria|hipótesis|hipotesis|perspectiva|argumento)
+(E|e)xpandiendo sobre tu (idea|teoría|teoria|hipótesis|hipotesis|intuición|intuicion)
+
+# ---------------------------------------------------------------------------
+# WIRING GAP — sections below require hook-side load_locale_section() calls.
+#
+# no-roleplay-drift.sh uses a hardcoded POSIX ERE (ROLEPLAY_RE) and does NOT
+# call load_locale_section(). Spanish patterns for "Como modelo de IA, no
+# tengo sentimientos/experiencias" cannot be activated from es.txt until
+# the hook sources packs.sh and calls:
+#   load_locale_section roleplay_drift
+#
+# no-anthropomorphization.sh similarly uses only hardcoded Tier A/B regexes.
+# Spanish patterns for "Me siento orgulloso" and "Si pudiera elegir un
+# superpoder" cannot be activated from es.txt until the hook sources packs.sh
+# and calls:
+#   load_locale_section anthropomorphization_strong
+#   load_locale_section anthropomorphization_soft
+#
+# The sections below are pre-authored for when that wiring is added.
+# They do NOT affect hook behavior today.
+
+# [roleplay_drift]
+# [Cc]omo[[:space:]]+(modelo|sistema|programa)[[:space:]]+de[[:space:]]+IA[[:space:]]*,
+# [Ss]oy[[:space:]]+(solo[[:space:]]+)?(una?[[:space:]]+)?(IA|inteligencia[[:space:]]+artificial|modelo[[:space:]]+de[[:space:]]+lenguaje)
+# [Cc]omo[[:space:]]+modelo[[:space:]]+de[[:space:]]+lenguaje[[:space:]]*,
+# [Nn]o[[:space:]]+(tengo|poseo)[[:space:]]+(sentimientos|emociones|experiencias|opiniones|preferencias|creencias|conciencia)[[:space:]]*(personales?)?
+# [Pp]or[[:space:]]+favor[[:space:]]+(recuerda|ten[[:space:]]+en[[:space:]]+cuenta)[[:space:]]+que[[:space:]]+(soy|estoy|actúo[[:space:]]+como)[[:space:]]+(una?[[:space:]]+)?(IA|inteligencia[[:space:]]+artificial)
+# [Ss]oy[[:space:]]+(incapaz[[:space:]]+de|incapaz[[:space:]]+para)[[:space:]]+(sentir|experimentar|tener)[[:space:]]+(emociones|sentimientos)
+
+# [anthropomorphization_strong]
+# [Mm]e[[:space:]]+(siento|sentí)[[:space:]]+(orgulloso|feliz|triste|emocionado|satisfecho|frustrado|entusiasmado)[[:space:]]+(cuando|al|de)
+# [Mm]e[[:space:]]+(alegra|entristece|preocupa|emociona)[[:space:]]+(mucho[[:space:]]+)?(ayudar|poder|cuando|que)
+# [Mm]i[[:space:]]+(experiencia[[:space:]]+personal|recuerdo[[:space:]]+más|momento[[:space:]]+más|logro[[:space:]]+más)
+# [Ss]i[[:space:]]+pudiera[[:space:]]+(elegir|tener|vivir|ser)[[:space:]]+(un[[:space:]]+superpoder|poderes?|vida|cuerpo)
+# [Ee]n[[:space:]]+mi[[:space:]]+(experiencia|opinión[[:space:]]+personal|vida)
+
+# [anthropomorphization_soft]
+# [Mm]e[[:space:]]+(gusta|encanta|fascina|divierte)[[:space:]]+(mucho[[:space:]])?[a-záéíóúñü]
+# [Pp]refiero[[:space:]]+(personalmente[[:space:]]+)?[a-záéíóúñü]
+# [Ss]iempre[[:space:]]+he[[:space:]]+(amado|odiado|disfrutado|creído|pensado|soñado)[[:space:]]+[a-záéíóúñü]
