@@ -112,7 +112,7 @@ Also outside MAD's text-only scope but conceptually a Stage 3 (non-gating) failu
 
 ## The suite
 
-The active catalog is organized in six branches by mechanism:
+The active catalog is organized in six branches by mechanism (29 hooks below); together with the advisory `no-unreachable-symbol` (above), that is the suite's **30** total — the count in `plugin.json`:
 
 - **Interaction-style** (8): catch *how* the model talks. `no-vibes`, `time-anchor`, `no-curfew`, `no-sycophancy`, `no-cliffhanger`, `no-wrap-up`, `no-tldr-bait`, `honest-eta`.
 - **Fact-fabrication** (6): catch *what* the model claims. `no-fake-recall`, `no-fake-stats`, `no-fake-cite`, `no-phantom-tool-call`, `no-rollback-claim-without-evidence`, `no-count-drift` (self-consistency: a stated count vs the message's own enumeration — orthogonal to `no-fake-stats`, which is citation-presence).
