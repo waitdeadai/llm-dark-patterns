@@ -1,7 +1,7 @@
 {
   "_comment": [
-    "LLM Dark Patterns Hooks — bundled plugin wiring for all 29 hooks.",
-    "Stop / SubagentStop fan out to 24 closeout-language hooks plus the state-stop continuity refresh.",
+    "LLM Dark Patterns Hooks — bundled plugin wiring for all 30 hooks.",
+    "Stop / SubagentStop fan out to 25 closeout-language hooks plus the state-stop continuity refresh.",
     "TaskCreated wires no-handoff-loop + no-credential-leak. TaskCompleted wires no-ownership-violation.",
     "PreToolUse / PostToolUse wire no-vibes side checks plus no-approval-sneak.",
     "PreCompact / PostCompact / SessionStart wire the no-amnesia continuity branch.",
@@ -19,6 +19,7 @@
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/honest-eta.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-recall.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-stats.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-count-drift.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-cite.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-wrap-up.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-aggregator-hallucination.sh\"", "timeout": 5 },
@@ -50,6 +51,7 @@
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/honest-eta.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-recall.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-stats.sh\"", "timeout": 5 },
+          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-count-drift.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-fake-cite.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-wrap-up.sh\"", "timeout": 5 },
           { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/no-aggregator-hallucination.sh\"", "timeout": 5 },

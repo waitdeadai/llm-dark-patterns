@@ -8,3 +8,5 @@
 # Stress runner output — regenerate locally with `bash tests/stress/run.sh`.
 # CI uploads it as a workflow artifact; no need to commit.
 tests/stress/STRESS-REPORT.md
+__pycache__/
+*.pyc
