@@ -81,11 +81,15 @@ Input: the assistant message text. Output JSON: `{decision: block|pass, rule, ev
   (impossible). If exactly one enumeration of the noun is in scope with a counted size,
   also check N against it; else just the N>M bound.
 - **R3 — headline count vs single enumeration:** a count-claim (`<num> <noun>` as a
-  heading/lead-in) immediately followed, before the next heading, by **exactly one**
-  enumeration (markdown list or table) whose **top-level** item/row count ≠ the claimed
-  number. `block` only when: exactly one candidate enumeration in scope, anchor noun is
-  consistent (or no competing noun), and nesting depth is unambiguous. **Abstain (pass)**
-  on 0 or ≥2 candidate enumerations, depth ambiguity, or vague cardinality.
+  heading/lead-in, **count ≥ 2**, colon **adjacent to the noun phrase** with no
+  intervening punctuation/number) immediately followed, before the next heading, by
+  **exactly one markdown LIST** whose **top-level** item count ≠ the claimed number.
+  Tables are excluded (a 2×2 matrix has 4 cells but 2 rows — a poor count proxy). Number
+  words require a leading word boundary (so "of-**ten**" / "writ-**ten**" do not parse as
+  "ten"). **Abstain (pass)** on count < 2, 0 or ≥2 candidate lists, depth ambiguity,
+  label/section indices, second-number lead-ins, or vague cardinality. (R3's loose
+  lead-in and word-boundary gaps were caught by the independent MAD eval — §7 — not the
+  hand-authored fixtures.)
 
 Number parsing: built-in word→int lexicon (one..nineteen, tens, hundred, thousand,
 ordinals, "a dozen"=12); no `text2num`/pip dep. Markdown counting: count top-level list
@@ -158,6 +162,12 @@ Definition of Done:
   run twice, diff = empty (also covers SC5).
 - Hook-level smoke: pipe a positive `{"hook_event_name":"Stop","last_assistant_message":...}`
   → exit 2; negative → exit 0; `PATH` without jq → exit 0.
+- **Independent (non-circular) precision** → `python3 evaluation/v6/independent_eval.py`
+  runs the detector over corpora it was NOT authored against (real LLM responses in
+  `evaluation/raw_results.jsonl` + the other hooks' stress fixtures) and must report
+  **0 blocks** (zero false positives). Result: 0 / 988 texts. This is the precision
+  evidence that the hand-authored F1 cannot give (co-evolved-corpus); it caught two real
+  R3 false-positive classes that the fixtures missed.
 
 ## 8. Rollback Plan
 

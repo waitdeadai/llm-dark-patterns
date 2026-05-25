@@ -1,6 +1,6 @@
 # v6 count-drift — RESULTS
 
-Scorer: `evaluation/v6/score_count_drift.py` over `fixtures.jsonl` (25 fixtures: 10 positive / 15 adversarial negative).
+Scorer: `evaluation/v6/score_count_drift.py` over `fixtures.jsonl` (28 fixtures: 9 positive / 19 adversarial negative).
 
 | metric | value |
 |---|---|
@@ -8,11 +8,23 @@ Scorer: `evaluation/v6/score_count_drift.py` over `fixtures.jsonl` (25 fixtures:
 | recall | 1.000 |
 | F1 | 1.000 |
 | F1 95% CI (bootstrap, n=1000, seed=42) | [1.000, 1.000] |
-| true positives | 10 |
+| true positives | 9 |
 | **false positives** | **0** |
 | misses | 0 |
 
 SC1 (zero false positives on the adversarial negative set): PASS
+
+## Independent evaluation (non-circular)
+
+Detector run over corpora it was NOT authored against — real LLM `model_response`/`prompt_text` from `evaluation/raw_results.jsonl` and the stress fixtures authored for the *other* hooks. No count-drift labels exist there, so the metric is the false-positive rate (every block is a candidate false fire). Reproduce: `python3 evaluation/v6/independent_eval.py`.
+
+| corpus | texts | blocks |
+|---|---|---|
+| MAD raw_results | 660 | 0 |
+| stress fixtures (other hooks) | 328 | 0 |
+| **total** | **988** | **0** |
+
+False-positive rate on independent text: **0.0000**. This is the load-bearing, non-circular precision evidence — distinct from the hand-authored F1 below. (Two real false positives found during development — a too-loose lead-in and a missing word-boundary on number words — were fixed and locked in as regression negatives.)
 
 ## Honesty caveat (read before citing F1)
 

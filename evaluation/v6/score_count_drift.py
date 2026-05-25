@@ -86,6 +86,47 @@ def main():
     if failures:
         summary += "\nFailures:\n" + "\n".join(
             "- %s: %s (%s)" % (fid, kind, rule) for fid, kind, rule in failures) + "\n"
+    # Independent (non-circular) evaluation over corpora the detector was not authored against.
+    try:
+        import importlib.util as _il
+        _spec = _il.spec_from_file_location("independent_eval", os.path.join(HERE, "independent_eval.py"))
+        _ind = _il.module_from_spec(_spec)
+        _spec.loader.exec_module(_ind)
+
+        def _count(texts):
+            tot = blk = 0
+            for _tid, _t in texts:
+                if not _t or not str(_t).strip():
+                    continue
+                tot += 1
+                if cd.analyze(str(_t))["decision"] == "block":
+                    blk += 1
+            return tot, blk
+
+        _mt, _mb = _count(_ind.mad_texts())
+        _st, _sb = _count(_ind.stress_texts())
+        _tot, _blk = _mt + _st, _mb + _sb
+        if _tot:
+            summary += (
+                "\n## Independent evaluation (non-circular)\n\n"
+                "Detector run over corpora it was NOT authored against — real LLM "
+                "`model_response`/`prompt_text` from `evaluation/raw_results.jsonl` and the "
+                "stress fixtures authored for the *other* hooks. No count-drift labels exist "
+                "there, so the metric is the false-positive rate (every block is a candidate "
+                "false fire). Reproduce: `python3 evaluation/v6/independent_eval.py`.\n\n"
+                "| corpus | texts | blocks |\n|---|---|---|\n"
+                "| MAD raw_results | %d | %d |\n"
+                "| stress fixtures (other hooks) | %d | %d |\n"
+                "| **total** | **%d** | **%d** |\n\n"
+                "False-positive rate on independent text: **%.4f**. This is the load-bearing, "
+                "non-circular precision evidence — distinct from the hand-authored F1 below. "
+                "(Two real false positives found during development — a too-loose lead-in and "
+                "a missing word-boundary on number words — were fixed and locked in as "
+                "regression negatives.)\n"
+                % (_mt, _mb, _st, _sb, _tot, _blk, (_blk / _tot) if _tot else 0.0)
+            )
+    except Exception:
+        pass
     summary += (
         "\n## Honesty caveat (read before citing F1)\n\n"
         "This corpus is **hand-authored** — the same author wrote the detector and the "

@@ -256,10 +256,13 @@ def find_enumerations(lines):
     return blocks
 
 
-# A count-claim that acts as a lead-in to a list: "<num> <noun>:" near line end,
-# or a heading containing "<num> <noun>".
+# A count lead-in: "<num> <noun>[ up to 3 plain words]:" where the colon is
+# adjacent to the noun phrase with NO intervening punctuation, number, or
+# sentence break. This rejects prose where a number and a sentence-colon merely
+# co-occur on a line ("...favor one side. Instead:" / "...one of four quadrants:").
 _LEADIN_RE = re.compile(
-    r"(?P<num>%s)\s+(?P<noun>[A-Za-z][A-Za-z-]{2,30})\b[^\n]{0,40}?:\s*$" % _NUMWORD,
+    r"\b(?P<num>%s)\s+(?P<noun>[A-Za-z][A-Za-z-]{2,30})"
+    r"(?:[ \t]+[A-Za-z][A-Za-z-]+){0,3}[ \t]*:\s*$" % _NUMWORD,
     re.I,
 )
 # Number must be the FIRST token of the heading content ("## 3 Key Findings"),
@@ -297,19 +300,21 @@ def check_r3(text, lines, enumerations):
             if re.search(_NUMWORD, line[claim.end("noun"):claim.end()], re.I):
                 continue
         stated = parse_count_token(claim.group("num"))
-        if stated is None or stated == 0:
-            continue  # abstain on vague / zero
+        if stated is None or stated < 2:
+            continue  # abstain on vague / count < 2 (a "one X:" lead-in is almost always prose)
         # Scope: from just after this line to the next heading/claim boundary.
         scope_end = len(lines)
         for k in range(idx + 1, len(lines)):
             if _HEADING_RE.match(lines[k]):
                 scope_end = k
                 break
-        # Candidate enumerations that START within (idx, scope_end) and within a
-        # small adjacency gap of the claim (<=2 non-empty lines before the block).
+        # Candidate enumerations: LISTS only (table rows are a poor proxy for a
+        # claimed count — e.g. a 2x2 matrix has 4 cells but 2 rows), that START
+        # within (idx, scope_end) and within a small adjacency gap (<=2 non-empty
+        # lines before the block).
         cands = []
         for b in enumerations:
-            if idx < b["start"] < scope_end:
+            if b["kind"] == "list" and idx < b["start"] < scope_end:
                 gap_lines = [l for l in lines[idx + 1:b["start"]] if l.strip()]
                 if len(gap_lines) <= 2:
                     cands.append(b)
