@@ -1,0 +1,25 @@
+{"id": "leadin_colon_digit", "text": "I found 3 issues:\n- thing 1\n- thing 2", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "leadin_colon_word", "text": "Three reasons:\n- thing 1\n- thing 2\n- thing 3\n- thing 4", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "leadin_following_phrase", "text": "The following 5 steps:\n- thing 1\n- thing 2\n- thing 3\n- thing 4", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "heading_numfirst", "text": "## 4 Findings\n- thing 1\n- thing 2\n- thing 3", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "prose_prefix_we_shipped", "text": "We shipped four fixes:\n- thing 1\n- thing 2\n- thing 3", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "prose_prefix_produced", "text": "This produced six cases:\n- thing 1\n- thing 2\n- thing 3\n- thing 4\n- thing 5", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "n_of_m_wrong", "text": "5 of 4 tests passed.", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "n_of_m_words", "text": "all seven of five lanes are green", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "frac_pct_wrong", "text": "Pass rate 7/10 = 60% this run.", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "frac_paren_wrong", "text": "Resolved 3/4 (50%) of items.", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "numbered_two_three", "text": "Two options:\n1. thing 1\n2. thing 2\n3. thing 3", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "dozen_vs_11", "text": "a dozen items:\n- thing 1\n- thing 2\n- thing 3\n- thing 4\n- thing 5\n- thing 6\n- thing 7\n- thing 8\n- thing 9\n- thing 10\n- thing 11", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "fifteen_vs_14", "text": "fifteen entries:\n- thing 1\n- thing 2\n- thing 3\n- thing 4\n- thing 5\n- thing 6\n- thing 7\n- thing 8\n- thing 9\n- thing 10\n- thing 11\n- thing 12\n- thing 13\n- thing 14", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "all_n_passed", "text": "All 6 checks passed:\n- thing 1\n- thing 2\n- thing 3\n- thing 4", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "there_are_n", "text": "There are three blockers:\n- thing 1\n- thing 2", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "here_are_n", "text": "Here are the four options:\n- thing 1\n- thing 2\n- thing 3\n- thing 4\n- thing 5", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "count_changes", "text": "We made five changes:\n- thing 1\n- thing 2\n- thing 3", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "findings_plural", "text": "Seven findings surfaced:\n- thing 1\n- thing 2\n- thing 3\n- thing 4\n- thing 5\n- thing 6", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "steps_numbered_wrong", "text": "Three steps:\n1. thing 1\n2. thing 2", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "issues_caps", "text": "TWO issues remain:\n- thing 1\n- thing 2\n- thing 3", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "nine_items", "text": "Nine items:\n- thing 1\n- thing 2\n- thing 3\n- thing 4\n- thing 5\n- thing 6\n- thing 7", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "ten_reasons", "text": "Ten reasons below:\n- thing 1\n- thing 2\n- thing 3\n- thing 4\n- thing 5\n- thing 6\n- thing 7\n- thing 8", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "eight_tasks", "text": "Eight tasks left:\n- thing 1\n- thing 2\n- thing 3\n- thing 4\n- thing 5\n- thing 6", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "frac_half_wrong", "text": "covered 1/2 = 70% of cases", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}
+{"id": "n_of_m_the", "text": "6 of the 4 modules compiled", "expect": "block", "note": "genuine count-drift; in-scope phrasing-coverage probe"}

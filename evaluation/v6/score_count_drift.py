@@ -127,6 +127,33 @@ def main():
             )
     except Exception:
         pass
+
+    # Recall probe: in-scope phrasing-coverage over genuine count-drift positives.
+    try:
+        probe = load(os.path.join(HERE, "recall_probe.jsonl"))
+        verdicts = [(r["id"], cd.analyze(r["text"])["decision"]) for r in probe]
+        pcaught = sum(1 for _, d in verdicts if d == "block")
+        pmiss = [pid for pid, d in verdicts if d != "block"]
+        if probe:
+            summary += (
+                "\n## Recall probe (in-scope phrasing coverage)\n\n"
+                "%d genuine count-drift positives authored to span phrasing variety "
+                "(digit/word lead-ins, number-first headings, prose prefixes, 'all N "
+                "passed', 'there/here are N', numbered lists, 'a dozen', N-of-M, "
+                "fraction/percent). Reproduce: `python3 evaluation/v6/score_count_drift.py`.\n\n"
+                "Recall on in-scope positives: **%d/%d = %.2f**.%s\n\n"
+                "Caveat: hand-authored, so this measures coverage across the phrasing space "
+                "the author could enumerate, not wild recall. Out-of-scope forms (a count "
+                "with no adjacent enumeration, flowing-prose counts, table/semantic matches) "
+                "are abstained by design; extending to them needs an LLM-judge advisory tier, "
+                "deliberately deferred (it never blocks, and self-consistent count errors are "
+                "exactly what LLM judges miss).\n"
+                % (len(probe), pcaught, len(probe), pcaught / len(probe),
+                   "" if not pmiss else " Misses: " + ", ".join(pmiss) + ".")
+            )
+    except Exception:
+        pass
+
     summary += (
         "\n## Honesty caveat (read before citing F1)\n\n"
         "This corpus is **hand-authored** — the same author wrote the detector and the "

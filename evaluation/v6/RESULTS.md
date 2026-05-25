@@ -26,6 +26,14 @@ Detector run over corpora it was NOT authored against — real LLM `model_respon
 
 False-positive rate on independent text: **0.0000**. This is the load-bearing, non-circular precision evidence — distinct from the hand-authored F1 below. (Two real false positives found during development — a too-loose lead-in and a missing word-boundary on number words — were fixed and locked in as regression negatives.)
 
+## Recall probe (in-scope phrasing coverage)
+
+25 genuine count-drift positives authored to span phrasing variety (digit/word lead-ins, number-first headings, prose prefixes, 'all N passed', 'there/here are N', numbered lists, 'a dozen', N-of-M, fraction/percent). Reproduce: `python3 evaluation/v6/score_count_drift.py`.
+
+Recall on in-scope positives: **25/25 = 1.00**.
+
+Caveat: hand-authored, so this measures coverage across the phrasing space the author could enumerate, not wild recall. Out-of-scope forms (a count with no adjacent enumeration, flowing-prose counts, table/semantic matches) are abstained by design; extending to them needs an LLM-judge advisory tier, deliberately deferred (it never blocks, and self-consistent count errors are exactly what LLM judges miss).
+
 ## Honesty caveat (read before citing F1)
 
 This corpus is **hand-authored** — the same author wrote the detector and the fixtures — so an F1 of 1.0 here is **not** a wild-generalization claim; it is a co-evolved-corpus number and would inflate if cited as field performance. What the number legitimately shows: the detector behaves to spec on the designed cases, **including the adversarial negatives authored to break it** (nested-colon lead-ins, section-index numbers, label words, approximation markers, ambiguous multi-list scope, nested-list depth). The load-bearing, generalizable metric is **precision / zero-false-positives on those adversarial negatives** — the property a blocking gate must hold.
