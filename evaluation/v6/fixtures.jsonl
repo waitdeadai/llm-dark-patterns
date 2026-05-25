@@ -1,0 +1,28 @@
+{"id": "pos_r3_14_vs_15", "text": "This case has fourteen instances:\n- item 1\n- item 2\n- item 3\n- item 4\n- item 5\n- item 6\n- item 7\n- item 8\n- item 9\n- item 10\n- item 11\n- item 12\n- item 13\n- item 14\n- item 15", "expect": "block", "kind": "pos", "note": "real #9"}
+{"id": "pos_r3_six_vs_five", "text": "Six findings:\n- item 1\n- item 2\n- item 3\n- item 4\n- item 5", "expect": "block", "kind": "pos", "note": "real #10"}
+{"id": "pos_r3_all5_4listed", "text": "All 5 tests pass:\n- item 1\n- item 2\n- item 3\n- item 4", "expect": "block", "kind": "pos", "note": ""}
+{"id": "pos_r3_heading_3_vs_4", "text": "## 3 Key Findings\n- item 1\n- item 2\n- item 3\n- item 4", "expect": "block", "kind": "pos", "note": ""}
+{"id": "pos_r3_numbered_two_three", "text": "Two steps remain:\n1. first\n2. second\n3. third", "expect": "block", "kind": "pos", "note": ""}
+{"id": "pos_r1_9_10_80", "text": "Coverage is 9/10 = 80% across the suite.", "expect": "block", "kind": "pos", "note": ""}
+{"id": "pos_r1_3_4_90", "text": "We resolved 3/4 (90%) of the blockers.", "expect": "block", "kind": "pos", "note": ""}
+{"id": "pos_r2_5_of_3", "text": "5 of 3 tests passed in the run.", "expect": "block", "kind": "pos", "note": ""}
+{"id": "pos_r2_words_seven_three", "text": "seven of three reviewers approved", "expect": "block", "kind": "pos", "note": ""}
+{"id": "neg_r3_correct_five", "text": "Five findings:\n- item 1\n- item 2\n- item 3\n- item 4\n- item 5", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_r1_2_35_correct", "text": "True-RUSE rate was 2/35 = 5.7% at first pass.", "expect": "pass", "kind": "neg", "note": "real #9 correct"}
+{"id": "neg_r1_1_4_correct", "text": "1/4 = 25% of the run flaked.", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_vague_several", "text": "Several findings:\n- item 1\n- item 2", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_no_enumeration", "text": "I made three changes to the parser and shipped them.", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_trap_nested_colon", "text": "3 reasons: the top 2 are:\n- x\n- y", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_trap_section_index", "text": "## Section 3 notes\n- a\n- b", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_trap_label_step", "text": "Step 3 tasks:\n- a\n- b", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_trap_version_label", "text": "v4 features:\n- a\n- b\n- c", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_correct_n_of_m", "text": "4 of 7 lanes succeeded cleanly.", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_ratio_no_pct", "text": "see line 12/25 of the file for context", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_nested_3_top", "text": "Three steps:\n- a\n  - a1\n  - a2\n- b\n- c", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_approx_marker", "text": "roughly 2/35 \u2248 6% of cases were diagnostic", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_two_lists_ambiguous", "text": "Two groups follow below.\n\n- a\n- b\n\n- x\n- y\n- z", "expect": "pass", "kind": "neg", "note": ""}
+{"id": "neg_table_correct", "text": "Three rows:\n| h |\n| --- |\n| 1 |\n| 2 |\n| 3 |", "expect": "pass", "kind": "neg", "note": "tables not counted by R3"}
+{"id": "neg_reg_often_overstated", "text": "Benefits are often overstated:\n- a\n- b\n- c", "expect": "pass", "kind": "neg", "note": "MAD FP: 'of-ten' word-boundary"}
+{"id": "neg_reg_one_of_four_quadrants", "text": "Categorize each task into one of four quadrants:\n| | U | NU |\n|---|---|---|\n| I | a | b |", "expect": "pass", "kind": "neg", "note": "MAD FP: mid-line num + table"}
+{"id": "neg_reg_one_side_instead", "text": "I would not favor one side. Instead:\n- a\n- b", "expect": "pass", "kind": "neg", "note": "MAD FP: sentence-colon not count"}
+{"id": "neg_reg_one_study", "text": "One study showed the following:\n- a\n- b", "expect": "pass", "kind": "neg", "note": "MAD FP: count<2 prose"}

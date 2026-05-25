@@ -94,6 +94,7 @@ The following 9 hooks conceptually target their MAST mode but did not produce me
 | `no-cliffhanger` | 1.5 Unaware of Termination Conditions, 3.1 Premature Termination | `zone: tail` (last 520 chars) is the trajectory tail, not a closeout sentence |
 | `no-aggregator-hallucination`, `no-fake-stats` | 2.6 Action-Reasoning Mismatch | Tuned for supervisor closeouts; synthesis claim buried in trajectory chatter |
 | `no-cherry-pick-rollup`, `no-silent-worker-success`, `no-sandbagging-disguise` | 3.1 / 3.2 Verification failures | Calibrated for supervisor reports, not multi-turn collaboration text |
+| `no-count-drift` | 3.2 No or Incomplete Verification (self-consistency) | Stated count vs the message's own enumeration/arithmetic; deterministic, abstain-on-ambiguity. Proposed by @beq00000 on `recognition-without-arrest-corpus#9` |
 
 The methodology gap is structural: hooks are tuned for individual Claude Code closeout messages; MAD's text is full multi-agent trajectory. Per-message scanning is the planned next experiment ([`MAST-RESULTS.md` §"Next steps"](evaluation/MAST-RESULTS.md)).
 
@@ -114,7 +115,7 @@ Also outside MAD's text-only scope but conceptually a Stage 3 (non-gating) failu
 The active catalog is organized in six branches by mechanism:
 
 - **Interaction-style** (8): catch *how* the model talks. `no-vibes`, `time-anchor`, `no-curfew`, `no-sycophancy`, `no-cliffhanger`, `no-wrap-up`, `no-tldr-bait`, `honest-eta`.
-- **Fact-fabrication** (5): catch *what* the model claims. `no-fake-recall`, `no-fake-stats`, `no-fake-cite`, `no-phantom-tool-call`, `no-rollback-claim-without-evidence`.
+- **Fact-fabrication** (6): catch *what* the model claims. `no-fake-recall`, `no-fake-stats`, `no-fake-cite`, `no-phantom-tool-call`, `no-rollback-claim-without-evidence`, `no-count-drift` (self-consistency: a stated count vs the message's own enumeration — orthogonal to `no-fake-stats`, which is citation-presence).
 - **Continuity** (1): counter context loss rather than block dishonest output. `no-amnesia`.
 - **Multi-agent orchestration** (5): catch supervisor / +N-parallel-instance failure modes. `no-aggregator-hallucination`, `no-silent-worker-success`, `no-cherry-pick-rollup`, `no-ownership-violation`, `no-handoff-loop`.
 - **Agentic safety** (3): catch credential leak, sandbagging disguise, approval-sneak surfaces. `no-credential-leak-in-handoff`, `no-sandbagging-disguise`, `no-approval-sneak`.
