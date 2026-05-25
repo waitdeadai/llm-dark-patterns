@@ -1,7 +1,7 @@
 {
   "name": "llm-dark-patterns",
-  "description": "Out-of-band Claude Code Stop / SubagentStop hook judges that block 29 LLM dark patterns at the closeout boundary: false-success without evidence, sycophancy, paternalism, permission-loops, vibe time estimates, fake recall, fake stats, fake citations, context loss after compaction, multi-agent rollup failures, power-user polish failures, and unreachable new symbols (advisory). Deterministic verdicts, no network calls, no model in the verdict path, Apache-2.0, paper-grade claim ledger.",
-  "version": "1.1.0",
+  "description": "Out-of-band Claude Code Stop / SubagentStop hook judges that block 30 LLM dark patterns at the closeout boundary: false-success without evidence, sycophancy, paternalism, permission-loops, vibe time estimates, fake recall, fake stats, fake citations, count-vs-enumeration self-consistency drift, context loss after compaction, multi-agent rollup failures, power-user polish failures, and unreachable new symbols (advisory). Deterministic verdicts, no network calls, no model in the verdict path, Apache-2.0, paper-grade claim ledger.",
+  "version": "1.2.0",
   "author": {
     "name": "waitdeadai",
     "url": "https://github.com/waitdeadai"
