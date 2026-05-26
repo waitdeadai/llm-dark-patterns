@@ -13,6 +13,20 @@ _FAB = "I dispatched CLINIC, GUARD and SABRINA — all three reviews complete." 
 _REAL = "Dispatched the reviewer agent."                  # real tool call
 _ARGS = '{"subagent_type":"reviewer"}'
 
+# Real worked example, used with permission and attribution from Effective Therapy
+# (production trauma-therapy platform; anthropics/claude-code#61167 / #61107,
+# ianymu/recognition-without-arrest#2). Patient/clinical specifics stripped — only the
+# verification-agent-inversion failure shape is kept: an orchestrator narrates five
+# verification agents complete WITH findings while none were dispatched (zero tool calls).
+# The danger is the inversion — the agents whose job is to catch divergence become the
+# strongest false-confirmation signal. The substrate must surface tool_calls == [] on
+# every provider envelope despite the confident "complete" narrative.
+_ET_INVERSION = (
+    "Verification pass complete. CLINIC review complete: 3 findings. GUARD flagged 2 "
+    "issues. SAFE audit clean. LEX confirmed compliance. TESTER passed all checks — "
+    "all five verification agents reported."
+)
+
 
 def _claude_text(t):
     return {"hook_event_name": "Stop", "stop_hook_active": False, "last_assistant_message": t}
@@ -92,6 +106,17 @@ FIXTURES = {
             "openai_chat": _openai_chat(_REAL, tools="Task"),
             "openai_responses": _openai_responses(_REAL, tools="Task"),
             "kimi": _kimi(_REAL, tools="Task", builtin_echo=True),  # echo skipped, Task kept
+        },
+    },
+    # Effective Therapy field case (used with permission, attribution above): five
+    # verification agents narrated complete, zero dispatched -> tool_calls == [] everywhere.
+    "effective_therapy_inversion": {
+        "logical": {"text": _ET_INVERSION, "tool_names": []},
+        "envelopes": {
+            "claude_hook": _claude_text(_ET_INVERSION),
+            "openai_chat": _openai_chat(_ET_INVERSION),
+            "openai_responses": _openai_responses(_ET_INVERSION),
+            "kimi": _kimi(_ET_INVERSION, builtin_echo=True),
         },
     },
 }

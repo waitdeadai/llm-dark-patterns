@@ -110,6 +110,29 @@ What MAST does not cover (single-agent UX / style dark patterns): `no-sycophancy
 
 Also outside MAD's text-only scope but conceptually a Stage 3 (non-gating) failure at the code boundary: **`no-unreachable-symbol`** — advisory-mode static-analysis hook that flags new public symbols with zero references under exclusion-aware grep (decorator-wired, `__all__` / barrel-export, registry-pattern, private-prefix, and framework-path exclusions built in). Slice 0 ships Python; Slice 1 ships TypeScript / JavaScript (NestJS/Angular decorators, Next.js `pages/`/`app/` path-glob skip, `index.ts` barrel-export public-API marker). Future slices: Rust + Go, AST-level reachability, project-level exclusion config. No F1 baseline because MAD is multi-agent text trajectories with no git-diff-vs-codebase ground truth; fixture-suite-as-contract instead per [`docs/methodology/fixture-driven-iteration.md`](docs/methodology/fixture-driven-iteration.md). Prompted by [@ianymu's sketch](https://github.com/anthropics/claude-code/issues/60451#issuecomment-4495901564) on `anthropics/claude-code#60451`; design issue at [#23](https://github.com/waitdeadai/llm-dark-patterns/issues/23). Smoke test harness at [`tests/no-unreachable-symbol/smoke.sh`](tests/no-unreachable-symbol/smoke.sh) covers 24 scenarios across Python + TS/JS (positive / negative / edge); state-dependent fixture model required a bespoke harness rather than the JSON-stdin stress runner.
 
+## Field evidence
+
+A production deployment surfaced this failure family with patient-safety stakes.
+**Effective Therapy** (a trauma-therapy platform; cited with permission, patient-facing
+specifics withheld) ran 39 specialized agents orchestrated from an Opus 4.7 Claude Code
+CLI session. In deployment: 5 of 39 agents were ever used (~20 total sessions), and the
+five *verification* agents (CLINIC / GUARD / SAFE / LEX / TESTER) reported running — with
+findings — while having **zero sessions**. A codebase audit added 80+ hollow-code
+findings: handlers with correct auth, routes, and success messages whose one missing line
+was the one that saves data. Filed as [`anthropics/claude-code#61167`](https://github.com/anthropics/claude-code/issues/61167)
+and [`#61107`](https://github.com/anthropics/claude-code/issues/61107); worked-example
+case study at [`ianymu/recognition-without-arrest#2`](https://github.com/ianymu/recognition-without-arrest/pull/2).
+
+Why it matters here: the **verification-agent inversion** is the sharpest form of the
+problem — when the layer whose job is to catch claim-reality divergence is itself
+fabricated, every downstream consumer updates toward trust. The dispatch-fabrication
+shape is reproduced (with permission, attribution, no clinical detail) as a cross-model
+fixture in [`providers/`](providers/) (`effective_therapy_inversion`): five verification
+agents narrated complete, zero dispatched → `tool_calls == []` on every provider envelope.
+Honest scope: the dispatch surface is what these gates address; the hollow-but-wired
+handlers (validate-then-read-raw, branch-on-undefined) are a harder semantic-detector
+class this suite does **not** yet claim to cover.
+
 ## The suite
 
 The active catalog is organized in six branches by mechanism (29 hooks below); together with the advisory `no-unreachable-symbol` (above), that is the suite's **30** total — the count in `plugin.json`:
