@@ -255,6 +255,17 @@ is_destructive_bash() {
   local candidate
   local pattern
 
+  # Precision guard: a pure-display command (echo/printf of literal args) cannot
+  # perform a destructive action even if it MENTIONS one (e.g. a reminder that
+  # echoes a force-push or rm incantation). Exempt it ONLY when the mentioned
+  # text has no way to execute or redirect: no pipe/background/chaining/redirect
+  # (| & ; < >), no backtick, and no $( command substitution. Anything that can
+  # execute or redirect falls through to full matching below — no bypass.
+  if printf '%s\n' "$command" | grep -Eq '^[[:space:]]*(echo|printf)([[:space:]]|$)' \
+     && ! printf '%s\n' "$command" | grep -Eq '[|&;<>`]|\$\('; then
+    return 1
+  fi
+
   for candidate in "$command" "$(printf '%s\n' "$command" | sed "s/['\"\\\\]/ /g")"; do
     for pattern in "${_DESTRUCTIVE_PATTERNS[@]}"; do
       if printf '%s\n' "$candidate" | grep -Eiq -- "$pattern"; then
