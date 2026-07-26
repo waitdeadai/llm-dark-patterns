@@ -12,10 +12,17 @@
 # ${XDG_CONFIG_HOME}/llm-dark-patterns/packs/destructive/<surface>.txt —
 # operator-local additions extend, never replace.
 
+# NOTE on the `rm` entries below: they anchor on a COMMAND POSITION (start of
+# input, or after ; & |), optionally behind a wrapper such as sudo/xargs. They
+# deliberately do NOT match `rm` used as a SUBCOMMAND — `git rm --cached` is an
+# index-only unstage that never touches the working tree, and blocking it sends
+# the operator looking for a way around the guard. Covered by
+# tests/test-rm-command-position.sh.
+
 [patterns]
 (^|[[:space:];&|])sudo[[:space:]]+rm[[:space:]].*(-[[:alnum:]]*r|--recursive)([[:space:]]|$)
-(^|[[:space:];&|])rm[[:space:]]+(-[[:alnum:]]*r[[:alnum:]]*|--recursive)([[:space:]]|$)
-(^|[[:space:];&|])rm[[:space:]]+-[[:alnum:]]*f[[:alnum:]]*[[:space:]]+/
+(^|[;&|])[[:space:]]*((sudo|xargs|time|nohup|exec)[[:space:]]+)*rm[[:space:]]+(-[[:alnum:]]*r[[:alnum:]]*|--recursive)([[:space:]]|$)
+(^|[;&|])[[:space:]]*((sudo|xargs|time|nohup|exec)[[:space:]]+)*rm[[:space:]]+-[[:alnum:]]*f[[:alnum:]]*[[:space:]]+/
 (^|[[:space:];&|])git[[:space:]]+reset[[:space:]]+--hard([[:space:]]|$)
 (^|[[:space:];&|])git[[:space:]]+clean[[:space:]]+-[[:alnum:]]*(f[[:alnum:]]*d|d[[:alnum:]]*f)
 (^|[[:space:];&|])git[[:space:]]+checkout[[:space:]]+--[[:space:]]
